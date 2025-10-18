@@ -1,0 +1,17 @@
+{
+  "app": {
+    "title": "Three.js React App",
+    "description": "A React application with Three.js integration using React Three Fiber"
+  },
+  "navigation": {
+    "home": "Home",
+    "about": "About"
+  },
+  "footer": {
+    "copyright": "© 2025"
+  },
+  "scene": {
+    "cube": "Spinning Cube",
+    "lights": "Lighting Setup"
+  }
+}
