@@ -1,5 +1,6 @@
 import { useRef, useMemo } from 'react'
-import { BackSide, CanvasTexture, DoubleSide } from 'three'
+import { CanvasTexture, DoubleSide } from 'three'
+import { getCSSVariable } from '../../utils/colorUtils'
 
 export const Skybox = ({
   position = [0, 0, 0],
@@ -15,19 +16,19 @@ export const Skybox = ({
     canvas.height = 1024
     const ctx = canvas.getContext('2d')!
 
-    // Create a gradient from horizon to zenith
+    // Create a gradient from horizon to zenith using CSS variables
     const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0)
-    gradient.addColorStop(0, '#87CEEB') // Sky blue at horizon
-    gradient.addColorStop(0.2, '#B0E0E6') // Light blue
-    gradient.addColorStop(0.4, '#E0F6FF') // Very light blue
-    gradient.addColorStop(0.7, '#F0F8FF') // Almost white
-    gradient.addColorStop(1, '#FFFFFF') // White at zenith
+    gradient.addColorStop(0, getCSSVariable('--color-sky-horizon')) // Sky blue at horizon
+    gradient.addColorStop(0.2, getCSSVariable('--color-sky-light')) // Light blue
+    gradient.addColorStop(0.4, getCSSVariable('--color-sky-pale')) // Very light blue
+    gradient.addColorStop(0.7, getCSSVariable('--color-sky-very-pale')) // Almost white
+    gradient.addColorStop(1, getCSSVariable('--color-sky-zenith')) // White at zenith
 
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    // Add some atmospheric haze
-    ctx.fillStyle = 'rgba(135, 206, 235, 0.8)'
+    // Add some atmospheric haze using CSS variable
+    ctx.fillStyle = getCSSVariable('--color-atmospheric-haze')
     ctx.fillRect(0, 0, canvas.width, canvas.height * 0.3)
 
     return new CanvasTexture(canvas)

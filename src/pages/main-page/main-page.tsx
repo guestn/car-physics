@@ -1,13 +1,25 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
+import { useState } from 'react'
 import { SpinningCube } from '../../components/domain/SpinningCube'
 import { FloorPlane } from '../../components/domain/FloorPlane'
 import { CustomTorus } from '../../components/domain/CustomTorus'
 import { TexturedSphere } from '../../components/domain/TexturedSphere'
 import { Skybox } from '../../components/domain/Skybox'
+import {
+  PerformanceWidget,
+  PerformanceTracker,
+} from '../../components/domain/PerformanceWidget'
+import type { PerformanceMetrics } from '../../components/domain/PerformanceWidget'
 import styles from './main-page.module.css'
 
 export const MainPage = () => {
+  const [performanceMetrics, setPerformanceMetrics] =
+    useState<PerformanceMetrics>({
+      fps: 0,
+      frameTime: 0,
+    })
+
   return (
     <div className={styles.mainPage}>
       <Canvas camera={{ position: [0, 2, 20], fov: 25 }} shadows="soft">
@@ -26,8 +38,12 @@ export const MainPage = () => {
         <FloorPlane position={[0, -1, 0]} />
         <CustomTorus position={[3, 1, 0]} />
         <TexturedSphere position={[-3, 1, 0]} />
+
+        <PerformanceTracker onMetricsUpdate={setPerformanceMetrics} />
         <OrbitControls enableZoom={true} />
       </Canvas>
+
+      <PerformanceWidget metrics={performanceMetrics} />
     </div>
   )
 }

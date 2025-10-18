@@ -1,0 +1,72 @@
+// Color system using CSS custom properties
+:root {
+  // Sky colors
+  --color-sky-horizon: rgb(135 206 235 / 100%);
+  --color-sky-light: rgb(176 224 230 / 100%);
+  --color-sky-pale: rgb(224 246 255 / 100%);
+  --color-sky-very-pale: rgb(240 248 255 / 100%);
+  --color-sky-zenith: rgb(255 255 255 / 100%);
+
+  // Cloud colors
+  --color-cloud-primary: rgb(255 255 255 / 90%);
+  --color-cloud-secondary: rgb(255 255 255 / 60%);
+  --color-cloud-tertiary: rgb(255 255 255 / 30%);
+
+  // Atmospheric effects
+  --color-atmospheric-haze: rgb(135 206 235 / 80%);
+  --color-atmospheric-haze-light: rgb(135 206 235 / 30%);
+
+  // Material colors
+  --color-material-blue: rgb(102 126 234 / 100%);
+  --color-material-purple: rgb(118 75 162 / 100%);
+  --color-material-pink: rgb(240 147 251 / 100%);
+
+  // UI colors
+  --color-ui-primary: rgb(74 85 104 / 100%);
+  --color-ui-secondary: rgb(113 128 150 / 100%);
+  --color-ui-accent: rgb(49 130 206 / 100%);
+
+  // Background colors
+  --color-bg-primary: rgb(255 255 255 / 100%);
+  --color-bg-secondary: rgb(247 250 252 / 100%);
+  --color-bg-tertiary: rgb(237 242 247 / 100%);
+  --color-bg-translucent: rgb(255 255 255 / 40%);
+
+  // Text colors
+  --color-text-primary: rgb(45 55 72 / 100%);
+  --color-text-secondary: rgb(74 85 104 / 100%);
+  --color-text-muted: rgb(113 128 150 / 100%);
+
+  // Status colors
+  --color-success: rgb(56 161 105 / 100%);
+  --color-warning: rgb(214 158 46 / 100%);
+  --color-error: rgb(229 62 62 / 100%);
+  --color-info: rgb(49 130 206 / 100%);
+}
+
+// Dark theme support
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-sky-horizon: rgb(74 144 226 / 100%);
+    --color-sky-light: rgb(91 160 242 / 100%);
+    --color-sky-pale: rgb(107 176 255 / 100%);
+    --color-sky-very-pale: rgb(123 192 255 / 100%);
+    --color-sky-zenith: rgb(139 208 255 / 100%);
+
+    --color-cloud-primary: rgb(255 255 255 / 80%);
+    --color-cloud-secondary: rgb(255 255 255 / 50%);
+    --color-cloud-tertiary: rgb(255 255 255 / 20%);
+
+    --color-atmospheric-haze: rgb(74 144 226 / 60%);
+    --color-atmospheric-haze-light: rgb(74 144 226 / 20%);
+
+    --color-bg-primary: rgb(26 32 44 / 100%);
+    --color-bg-secondary: rgb(45 55 72 / 100%);
+    --color-bg-tertiary: rgb(74 85 104 / 100%);
+    --color-bg-translucent: rgb(26 32 44 / 80%);
+
+    --color-text-primary: rgb(247 250 252 / 100%);
+    --color-text-secondary: rgb(226 232 240 / 100%);
+    --color-text-muted: rgb(160 174 192 / 100%);
+  }
+}
