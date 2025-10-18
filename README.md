@@ -2,10 +2,6 @@
 
 This is a React application with Three.js integration using React Three Fiber.
 
-## Setup
-
-To complete the setup, make sure to add the `NPM_TOKEN` environment variable to your GitHub Actions secrets to be able to install private packages in the CI/CD pipeline.
-
 ## Getting started
 
 Install:

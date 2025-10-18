@@ -1,14 +1,15 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { SpinningCube } from '../../components/SpinningCube'
-import { FloorPlane } from '../../components/FloorPlane'
-import { CustomTorus } from '../../components/CustomTorus'
+import { SpinningCube } from '../../components/domain/SpinningCube'
+import { FloorPlane } from '../../components/domain/FloorPlane'
+import { CustomTorus } from '../../components/domain/CustomTorus'
+import { TexturedSphere } from '../../components/domain/TexturedSphere'
 import styles from './main-page.module.css'
 
 function MainPage() {
   return (
     <div className={styles.mainPage}>
-      <Canvas camera={{ position: [0, 2, 5], fov: 75 }} shadows="soft">
+      <Canvas camera={{ position: [0, 2, 20], fov: 25 }} shadows="soft">
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1.0} castShadow />
         <pointLight position={[10, 10, 10]} intensity={1.0} />
@@ -21,6 +22,7 @@ function MainPage() {
         <SpinningCube position={[0, 1, 0]} />
         <FloorPlane position={[0, -1, 0]} />
         <CustomTorus position={[3, 1, 0]} />
+        <TexturedSphere position={[-3, 1, 0]} />
         <OrbitControls enableZoom={true} />
       </Canvas>
     </div>
