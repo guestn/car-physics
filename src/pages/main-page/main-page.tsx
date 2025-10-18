@@ -8,7 +8,7 @@ import styles from './main-page.module.css'
 function MainPage() {
   return (
     <div className={styles.mainPage}>
-      <Canvas camera={{ position: [0, 2, 5], fov: 75 }} shadows>
+      <Canvas camera={{ position: [0, 2, 5], fov: 75 }} shadows="soft">
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1.0} castShadow />
         <pointLight position={[10, 10, 10]} intensity={1.0} />

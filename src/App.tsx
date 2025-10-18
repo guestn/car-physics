@@ -1,5 +1,5 @@
-import Header from './components/Header'
-import Footer from './components/Footer'
+import { Header } from './components/Header'
+import { Footer } from './components/Footer'
 import MainPage from './pages/main-page/main-page'
 import styles from './App.module.css'
 

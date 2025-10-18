@@ -6,9 +6,12 @@ const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
-  moduleNameMapping: pathsToModuleNameMapper(compilerOptions.paths || {}, {
-    prefix: '<rootDir>/',
-  }),
+  moduleNameMapper: pathsToModuleNameMapper(
+    (compilerOptions as any).paths || {},
+    {
+      prefix: '<rootDir>/',
+    }
+  ),
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
   },
