@@ -15,7 +15,7 @@ export const SpinningCube = ({ position = [0, 0, 0] }: SpinningCubeProps) => {
   })
 
   return (
-    <mesh ref={meshRef} position={position} castShadow>
+    <mesh ref={meshRef} position={position} castShadow receiveShadow>
       <boxGeometry args={[2, 2, 2]} />
       <meshPhysicalMaterial
         color="#ff6b6b"

@@ -26,9 +26,9 @@ export const MainPage = () => {
         <Skybox position={[0, 10, 0]} />
 
         <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1.0} castShadow />
+        <directionalLight position={[5, 5, 5]} intensity={3.0} castShadow />
+        <directionalLight position={[-5, 10, -5]} intensity={1.8} />
         <pointLight position={[10, 10, 10]} intensity={1.0} />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} />
 
         {/* Helper lines */}
         <axesHelper args={[5]} />

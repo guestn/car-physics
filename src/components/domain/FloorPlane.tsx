@@ -1,6 +1,6 @@
+import { useTexture } from '@react-three/drei'
 import { useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { Mesh } from 'three'
+import { DoubleSide, Mesh } from 'three'
 
 interface FloorPlaneProps {
   position?: [number, number, number]
@@ -8,6 +8,8 @@ interface FloorPlaneProps {
 
 export const FloorPlane = ({ position = [0, 0, 0] }: FloorPlaneProps) => {
   const planeRef = useRef<Mesh>(null!)
+
+  const floorTexture = useTexture('/textures/UV_Grid_Sm.jpg')
 
   return (
     <mesh
@@ -18,11 +20,10 @@ export const FloorPlane = ({ position = [0, 0, 0] }: FloorPlaneProps) => {
     >
       <planeGeometry args={[10, 10]} />
       <meshPhysicalMaterial
-        color="#ffffff"
+        map={floorTexture}
         metalness={0.8}
         roughness={0.0}
-        clearcoat={1.0}
-        clearcoatRoughness={0.1}
+        side={DoubleSide}
       />
     </mesh>
   )
