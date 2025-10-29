@@ -2,11 +2,11 @@ import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Mesh } from 'three'
 
-interface SpinningCubeProps {
+interface MeshToonCubeProps {
   position?: [number, number, number]
 }
 
-export const SpinningCube = ({ position = [0, 0, 0] }: SpinningCubeProps) => {
+export const MeshToonCube = ({ position = [0, 0, 0] }: MeshToonCubeProps) => {
   const meshRef = useRef<Mesh>(null!)
 
   useFrame((_, delta) => {
@@ -17,15 +17,7 @@ export const SpinningCube = ({ position = [0, 0, 0] }: SpinningCubeProps) => {
   return (
     <mesh ref={meshRef} position={position} castShadow receiveShadow>
       <boxGeometry args={[2, 2, 2]} />
-      <meshPhysicalMaterial
-        color="#ff6b6b"
-        metalness={0.8}
-        roughness={0.2}
-        clearcoat={1.0}
-        clearcoatRoughness={0.1}
-        emissive="#ff6b6b"
-        emissiveIntensity={0.3}
-      />
+      <meshToonMaterial color="#ff6b6b" />
     </mesh>
   )
 }

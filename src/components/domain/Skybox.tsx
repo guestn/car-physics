@@ -1,13 +1,13 @@
 import { useRef, useMemo } from 'react'
-import { CanvasTexture, DoubleSide } from 'three'
-import { getCSSVariable } from '../../utils/colorUtils'
+import { CanvasTexture, DoubleSide, Mesh } from 'three'
+import { getCSSVariable } from '@/utils/colorUtils'
 
 export const Skybox = ({
   position = [0, 0, 0],
 }: {
   position?: [number, number, number]
 }) => {
-  const skyboxRef = useRef<THREE.Mesh>(null!)
+  const skyboxRef = useRef<Mesh>(null!)
 
   // Create a stable sky texture using useMemo to prevent regeneration
   const skyTexture = useMemo(() => {

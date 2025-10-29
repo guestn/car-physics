@@ -1,10 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import styles from './PerformanceWidget.module.css'
+import type { PostProcessingSettings } from '../../effects/PostProcessingEffects'
 
 export interface PerformanceMetrics {
   fps: number
   frameTime: number
   memoryUsage?: number
+}
+
+interface PerformanceWidgetProps {
+  metrics: PerformanceMetrics
+  postProcessingSettings: PostProcessingSettings
+  onPostProcessingChange: (settings: PostProcessingSettings) => void
 }
 
 export const PerformanceTracker = ({
@@ -77,13 +84,14 @@ export const PerformanceTracker = ({
 // Display component that runs outside Canvas
 export const PerformanceWidget = ({
   metrics,
-}: {
-  metrics: PerformanceMetrics
-}) => {
+  postProcessingSettings,
+  onPostProcessingChange,
+}: PerformanceWidgetProps) => {
   const [isVisible, setIsVisible] = useState(true)
   const [position, setPosition] = useState({ x: 20, y: 80 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
+  const [showPostProcessing, setShowPostProcessing] = useState(false)
   const widgetRef = useRef<HTMLDivElement>(null)
 
   const getFpsColor = (fps: number): string => {
@@ -167,13 +175,22 @@ export const PerformanceWidget = ({
     >
       <div className={`${styles.header} widget-header`}>
         <h3 className={styles.title}>Performance</h3>
-        <button
-          className={styles.closeButton}
-          onClick={toggleVisibility}
-          title="Hide Performance Widget"
-        >
-          ×
-        </button>
+        <div className={styles.headerButtons}>
+          <button
+            className={styles.toggleButton}
+            onClick={() => setShowPostProcessing(!showPostProcessing)}
+            title="Toggle Post-Processing Controls"
+          >
+            🎨
+          </button>
+          <button
+            className={styles.closeButton}
+            onClick={toggleVisibility}
+            title="Hide Performance Widget"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       <div className={styles.metrics}>
@@ -199,6 +216,69 @@ export const PerformanceWidget = ({
           </div>
         )}
       </div>
+
+      {showPostProcessing && (
+        <div className={styles.postProcessingControls}>
+          <h4 className={styles.sectionTitle}>Post-Processing Effects</h4>
+          <div className={styles.checkboxGroup}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={postProcessingSettings.bloom}
+                onChange={(e) =>
+                  onPostProcessingChange({
+                    ...postProcessingSettings,
+                    bloom: e.target.checked,
+                  })
+                }
+              />
+              <span className={styles.checkboxText}>Bloom</span>
+            </label>
+
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={postProcessingSettings.vignette}
+                onChange={(e) =>
+                  onPostProcessingChange({
+                    ...postProcessingSettings,
+                    vignette: e.target.checked,
+                  })
+                }
+              />
+              <span className={styles.checkboxText}>Vignette</span>
+            </label>
+
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={postProcessingSettings.noise}
+                onChange={(e) =>
+                  onPostProcessingChange({
+                    ...postProcessingSettings,
+                    noise: e.target.checked,
+                  })
+                }
+              />
+              <span className={styles.checkboxText}>Noise</span>
+            </label>
+
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={postProcessingSettings.depthOfField}
+                onChange={(e) =>
+                  onPostProcessingChange({
+                    ...postProcessingSettings,
+                    depthOfField: e.target.checked,
+                  })
+                }
+              />
+              <span className={styles.checkboxText}>Depth of Field</span>
+            </label>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

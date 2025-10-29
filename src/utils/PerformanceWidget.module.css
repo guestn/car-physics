@@ -31,6 +31,12 @@
   margin-bottom: 8px;
 }
 
+.headerButtons {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
 .title {
   margin: 0;
   font-size: 14px;
@@ -88,7 +94,8 @@
   backdrop-filter: blur(10px);
   border: 1px solid var(--color-bg-tertiary);
   border-radius: 8px;
-  padding: 8px 12px;
+  padding: 4px 8px;
+  right: 4px;
   cursor: pointer;
   font-size: 16px;
   z-index: 1000;
@@ -101,4 +108,43 @@
   background-color: var(--color-bg-secondary);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Post-processing controls */
+.postProcessingControls {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-bg-tertiary);
+}
+
+.sectionTitle {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.checkboxLabel input[type='checkbox'] {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--color-ui-accent);
+}
+
+.checkboxText {
+  user-select: none;
 }

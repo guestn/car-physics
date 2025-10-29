@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useFrame, useLoader } from '@react-three/fiber'
 import { Mesh, TextureLoader } from 'three'
-import { getCSSVariable } from '../../utils/colorUtils'
+import { getCSSVariable } from '@/utils/colorUtils'
 
 interface TexturedSphereProps {
   position?: [number, number, number]
@@ -70,6 +70,8 @@ export const TexturedSphere = ({
         bumpScale={2.5}
         roughness={0.3}
         metalness={0.1}
+        emissive="#667eea"
+        emissiveIntensity={0.2}
       />
     </mesh>
   )
