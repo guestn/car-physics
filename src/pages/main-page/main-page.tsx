@@ -9,12 +9,12 @@ import { Skybox } from '@/components/domain/Skybox'
 import {
   PerformanceWidget,
   PerformanceTracker,
-} from '@/components/domain/PerformanceWidget'
-import type { PerformanceMetrics } from '@/components/domain/PerformanceWidget'
+} from '@/utils/PerformanceWidget'
+import type { PerformanceMetrics } from '@/utils/PerformanceWidget'
 import { PostProcessingEffects } from '@/effects/PostProcessingEffects'
 import type { PostProcessingSettings } from '@/effects/PostProcessingEffects'
-import styles from './main-page.module.css'
 import { MeshToonCube } from '@/components/domain/MeshToonCube'
+import styles from './main-page.module.css'
 
 export const MainPage = () => {
   const [performanceMetrics, setPerformanceMetrics] =
@@ -29,6 +29,7 @@ export const MainPage = () => {
       vignette: true,
       noise: false,
       depthOfField: false,
+      outline: false,
     })
 
   return (

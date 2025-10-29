@@ -7,8 +7,8 @@
   padding: 12px;
   min-width: 180px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+  font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
   font-size: 12px;
   cursor: move;
   user-select: none;
@@ -16,11 +16,11 @@
 }
 
 .widget:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 15%);
 }
 
 .widget.dragging {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 20%);
   cursor: grabbing;
 }
 
@@ -99,7 +99,7 @@
   cursor: pointer;
   font-size: 16px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
   transition: all 0.2s;
   user-select: none;
 }
@@ -107,7 +107,7 @@
 .toggleButton:hover {
   background-color: var(--color-bg-secondary);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 15%);
 }
 
 /* Post-processing controls */
@@ -118,7 +118,7 @@
 }
 
 .sectionTitle {
-  margin: 0 0 8px 0;
+  margin: 0 0 8px;
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text-primary);

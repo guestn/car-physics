@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import styles from './PerformanceWidget.module.css'
-import type { PostProcessingSettings } from '../../effects/PostProcessingEffects'
+import type { PostProcessingSettings } from '@/effects/PostProcessingEffects'
 
 export interface PerformanceMetrics {
   fps: number
