@@ -1,29 +1,25 @@
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
-import { useState, useEffect } from 'react'
-import { Physics } from '@react-three/cannon'
-import { SpinningCube } from '@/components/domain/SpinningCube'
-import { FloorPlane } from '@/components/domain/FloorPlane'
-import { CustomTorus } from '@/components/domain/CustomTorus'
-import { TexturedSphere } from '@/components/domain/TexturedSphere'
-import { Skybox } from '@/components/domain/Skybox'
-import { Car } from '@/components/domain/Car'
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { useState, useEffect } from 'react';
+import { Physics } from '@react-three/cannon';
+import { FloorPlane } from '@/components/domain/floor-plane/floor-plane';
+import { Skybox } from '@/components/domain/skybox/skybox';
+import { Car } from '@/components/domain/car/car';
 import {
   PerformanceWidget,
   PerformanceTracker,
-} from '@/utils/PerformanceWidget'
-import type { PerformanceMetrics } from '@/utils/PerformanceWidget'
-import { PostProcessingEffects } from '@/effects/PostProcessingEffects'
-import type { PostProcessingSettings } from '@/effects/PostProcessingEffects'
-import { MeshToonCube } from '@/components/domain/MeshToonCube'
-import styles from './main-page.module.css'
+} from '@/utils/performance-widget/performance-widget';
+import type { PerformanceMetrics } from '@/utils/performance-widget/performance-widget';
+import { PostProcessingEffects } from '@/effects/post-processing-effects';
+import type { PostProcessingSettings } from '@/effects/post-processing-effects';
+import styles from './main-page.module.css';
 
 export const MainPage = () => {
   const [performanceMetrics, setPerformanceMetrics] =
     useState<PerformanceMetrics>({
       fps: 0,
       frameTime: 0,
-    })
+    });
 
   const [postProcessingSettings, setPostProcessingSettings] =
     useState<PostProcessingSettings>({
@@ -32,14 +28,14 @@ export const MainPage = () => {
       noise: false,
       depthOfField: false,
       outline: false,
-    })
+    });
 
-  const [resetTrigger, setResetTrigger] = useState(0)
-  const [physicsReady, setPhysicsReady] = useState(false)
+  const [resetTrigger, setResetTrigger] = useState(0);
+  const [physicsReady, setPhysicsReady] = useState(false);
 
   const handleReset = () => {
-    setResetTrigger((prev) => prev + 1)
-  }
+    setResetTrigger((prev) => prev + 1);
+  };
 
   // Wait for next frame to ensure Canvas is ready before initializing physics
   useEffect(() => {
@@ -47,11 +43,11 @@ export const MainPage = () => {
     const frameId = requestAnimationFrame(() => {
       // Then wait a bit more for worker thread
       setTimeout(() => {
-        setPhysicsReady(true)
-      }, 200)
-    })
-    return () => cancelAnimationFrame(frameId)
-  }, [])
+        setPhysicsReady(true);
+      }, 200);
+    });
+    return () => cancelAnimationFrame(frameId);
+  }, []);
 
   //const ToggledDebug = useToggle(Debug, 'ToggledDebug')
 
@@ -60,7 +56,14 @@ export const MainPage = () => {
       <Canvas
         camera={{ position: [5, 2, 5], fov: 25 }}
         shadows="soft"
-        gl={{ antialias: true, alpha: true }}
+        gl={{
+          antialias: true,
+          alpha: true,
+          //   powerPreference: 'high-performance',
+          stencil: false,
+          depth: true,
+          logarithmicDepthBuffer: false,
+        }}
       >
         <Skybox position={[0, 10, 0]} />
 
@@ -86,14 +89,9 @@ export const MainPage = () => {
             <>
               <FloorPlane position={[0, 0, 0]} />
               <Car position={[0, 2, 0]} resetTrigger={resetTrigger} />
-              <TexturedSphere position={[-3, 10, 0]} />
             </>
           )}
         </Physics>
-
-        <SpinningCube position={[0, 100, 0]} />
-        <CustomTorus position={[3, 10, 0]} />
-        <MeshToonCube position={[0, 10, -3]} />
 
         <PerformanceTracker onMetricsUpdate={setPerformanceMetrics} />
         <OrbitControls enableZoom={true} />
@@ -115,7 +113,7 @@ export const MainPage = () => {
         Reset
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default MainPage
+export default MainPage;

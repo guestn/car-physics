@@ -1,85 +1,85 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import styles from './PerformanceWidget.module.css'
-import type { PostProcessingSettings } from '@/effects/PostProcessingEffects'
+import { useState, useRef, useEffect, useCallback } from 'react';
+import styles from './performance-widget.module.css';
+import type { PostProcessingSettings } from '@/effects/post-processing-effects';
 
 export interface PerformanceMetrics {
-  fps: number
-  frameTime: number
-  memoryUsage?: number
+  fps: number;
+  frameTime: number;
+  memoryUsage?: number;
 }
 
 interface PerformanceWidgetProps {
-  metrics: PerformanceMetrics
-  postProcessingSettings: PostProcessingSettings
-  onPostProcessingChange: (settings: PostProcessingSettings) => void
+  metrics: PerformanceMetrics;
+  postProcessingSettings: PostProcessingSettings;
+  onPostProcessingChange: (settings: PostProcessingSettings) => void;
 }
 
 export const PerformanceTracker = ({
   onMetricsUpdate,
 }: {
-  onMetricsUpdate: (metrics: PerformanceMetrics) => void
+  onMetricsUpdate: (metrics: PerformanceMetrics) => void;
 }) => {
-  const frameCountRef = useRef(0)
-  const lastTimeRef = useRef(performance.now())
-  const fpsHistoryRef = useRef<number[]>([])
+  const frameCountRef = useRef(0);
+  const lastTimeRef = useRef(performance.now());
+  const fpsHistoryRef = useRef<number[]>([]);
 
   useEffect(() => {
-    let animationId: number
+    let animationId: number;
 
     const updateMetrics = () => {
-      const currentTime = performance.now()
-      const deltaTime = currentTime - lastTimeRef.current
-      frameCountRef.current++
+      const currentTime = performance.now();
+      const deltaTime = currentTime - lastTimeRef.current;
+      frameCountRef.current++;
 
       // Update FPS every second
       if (deltaTime >= 1000) {
-        const fps = Math.round((frameCountRef.current * 1000) / deltaTime)
-        const frameTime = deltaTime / frameCountRef.current
+        const fps = Math.round((frameCountRef.current * 1000) / deltaTime);
+        const frameTime = deltaTime / frameCountRef.current;
 
         // Keep a rolling average of FPS for smoother display
-        fpsHistoryRef.current.push(fps)
+        fpsHistoryRef.current.push(fps);
         if (fpsHistoryRef.current.length > 10) {
-          fpsHistoryRef.current.shift()
+          fpsHistoryRef.current.shift();
         }
 
         const avgFps = Math.round(
           fpsHistoryRef.current.reduce((sum, f) => sum + f, 0) /
             fpsHistoryRef.current.length
-        )
+        );
 
         onMetricsUpdate({
           fps: avgFps,
           frameTime: Math.round(frameTime * 100) / 100,
           memoryUsage: getMemoryUsage(),
-        })
+        });
 
-        frameCountRef.current = 0
-        lastTimeRef.current = currentTime
+        frameCountRef.current = 0;
+        lastTimeRef.current = currentTime;
       }
 
-      animationId = requestAnimationFrame(updateMetrics)
-    }
+      animationId = requestAnimationFrame(updateMetrics);
+    };
 
-    animationId = requestAnimationFrame(updateMetrics)
+    animationId = requestAnimationFrame(updateMetrics);
 
     return () => {
       if (animationId) {
-        cancelAnimationFrame(animationId)
+        cancelAnimationFrame(animationId);
       }
-    }
-  }, [onMetricsUpdate])
+    };
+  }, [onMetricsUpdate]);
 
   const getMemoryUsage = (): number | undefined => {
     // @ts-ignore - performance.memory is not in TypeScript definitions
     if (performance.memory) {
       // @ts-ignore
-      return Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) // MB
+      return Math.round(performance.memory.usedJSHeapSize / 1024 / 1024); // MB
     }
-    return undefined
-  }
+    return undefined;
+  };
 
-  return null // This component doesn't render anything
-}
+  return null; // This component doesn't render anything
+};
 
 // Display component that runs outside Canvas
 export const PerformanceWidget = ({
@@ -87,38 +87,38 @@ export const PerformanceWidget = ({
   postProcessingSettings,
   onPostProcessingChange,
 }: PerformanceWidgetProps) => {
-  const [isVisible, setIsVisible] = useState(true)
-  const [position, setPosition] = useState({ x: 20, y: 80 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [showPostProcessing, setShowPostProcessing] = useState(false)
-  const widgetRef = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(true);
+  const [position, setPosition] = useState({ x: 20, y: 80 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [showPostProcessing, setShowPostProcessing] = useState(false);
+  const widgetRef = useRef<HTMLDivElement>(null);
 
   const getFpsColor = (fps: number): string => {
-    if (fps >= 55) return 'var(--color-success)'
-    if (fps >= 30) return 'var(--color-warning)'
-    return 'var(--color-error)'
-  }
+    if (fps >= 55) return 'var(--color-success)';
+    if (fps >= 30) return 'var(--color-warning)';
+    return 'var(--color-error)';
+  };
 
   const toggleVisibility = () => {
-    setIsVisible(!isVisible)
-  }
+    setIsVisible(!isVisible);
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (
       e.target === e.currentTarget ||
       (e.target as HTMLElement).closest('.widget-header')
     ) {
-      setIsDragging(true)
-      const rect = widgetRef.current?.getBoundingClientRect()
+      setIsDragging(true);
+      const rect = widgetRef.current?.getBoundingClientRect();
       if (rect) {
         setDragOffset({
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
-        })
+        });
       }
     }
-  }
+  };
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -126,26 +126,26 @@ export const PerformanceWidget = ({
         setPosition({
           x: e.clientX - dragOffset.x,
           y: e.clientY - dragOffset.y,
-        })
+        });
       }
     },
     [isDragging, dragOffset]
-  )
+  );
 
   const handleMouseUp = useCallback(() => {
-    setIsDragging(false)
-  }, [])
+    setIsDragging(false);
+  }, []);
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove)
-      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove)
-        document.removeEventListener('mouseup', handleMouseUp)
-      }
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp])
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   if (!isVisible) {
     return (
@@ -160,7 +160,7 @@ export const PerformanceWidget = ({
       >
         📊
       </button>
-    )
+    );
   }
 
   return (
@@ -280,5 +280,5 @@ export const PerformanceWidget = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};

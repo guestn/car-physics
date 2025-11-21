@@ -5,6 +5,7 @@ import {
   DepthOfField,
   Vignette,
   Outline,
+  FXAA,
 } from '@react-three/postprocessing'
 
 export interface PostProcessingSettings {
@@ -87,5 +88,9 @@ const createEffects = (settings: PostProcessingSettings) =>
 export const PostProcessingEffects = ({
   settings,
 }: PostProcessingEffectsProps) => (
-  <EffectComposer>{createEffects(settings)}</EffectComposer>
+  <EffectComposer>
+    {/* FXAA should be first to reduce aliasing and banding */}
+    <FXAA />
+    {createEffects(settings)}
+  </EffectComposer>
 )
