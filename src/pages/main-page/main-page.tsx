@@ -60,13 +60,13 @@ export const MainPage = () => {
       <Canvas
         camera={{ position: [5, 2, 5], fov: 25 }}
         shadows="soft"
-        gl={{ antialias: true }}
+        gl={{ antialias: true, alpha: true }}
       >
         <Skybox position={[0, 10, 0]} />
 
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[50, 150, 50]} intensity={3.0} castShadow />
-        <directionalLight position={[-5, 10, -5]} intensity={1.8} />
+        <ambientLight intensity={0.3} />
+        <directionalLight position={[50, 150, 50]} intensity={6.0} castShadow />
+        {/* <directionalLight position={[-5, 10, -5]} intensity={1.8} /> */}
         <pointLight position={[100, 100, 100]} intensity={1.0} />
 
         {/* Helper lines */}
