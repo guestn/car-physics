@@ -1,11 +1,13 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Physics } from '@react-three/cannon'
 import { SpinningCube } from '@/components/domain/SpinningCube'
 import { FloorPlane } from '@/components/domain/FloorPlane'
 import { CustomTorus } from '@/components/domain/CustomTorus'
 import { TexturedSphere } from '@/components/domain/TexturedSphere'
 import { Skybox } from '@/components/domain/Skybox'
+import { Car } from '@/components/domain/Car'
 import {
   PerformanceWidget,
   PerformanceTracker,
@@ -25,36 +27,73 @@ export const MainPage = () => {
 
   const [postProcessingSettings, setPostProcessingSettings] =
     useState<PostProcessingSettings>({
-      bloom: true,
-      vignette: true,
+      bloom: false,
+      vignette: false,
       noise: false,
       depthOfField: false,
       outline: false,
     })
 
+  const [resetTrigger, setResetTrigger] = useState(0)
+  const [physicsReady, setPhysicsReady] = useState(false)
+
+  const handleReset = () => {
+    setResetTrigger((prev) => prev + 1)
+  }
+
+  // Wait for next frame to ensure Canvas is ready before initializing physics
+  useEffect(() => {
+    // Use requestAnimationFrame to wait for Canvas to be ready
+    const frameId = requestAnimationFrame(() => {
+      // Then wait a bit more for worker thread
+      setTimeout(() => {
+        setPhysicsReady(true)
+      }, 200)
+    })
+    return () => cancelAnimationFrame(frameId)
+  }, [])
+
+  //const ToggledDebug = useToggle(Debug, 'ToggledDebug')
+
   return (
     <div className={styles.mainPage}>
       <Canvas
-        camera={{ position: [0, 2, 20], fov: 25 }}
+        camera={{ position: [5, 2, 5], fov: 25 }}
         shadows="soft"
         gl={{ antialias: true }}
       >
         <Skybox position={[0, 10, 0]} />
 
         <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 15, 5]} intensity={3.0} castShadow />
+        <directionalLight position={[50, 150, 50]} intensity={3.0} castShadow />
         <directionalLight position={[-5, 10, -5]} intensity={1.8} />
-        <pointLight position={[10, 10, 10]} intensity={1.0} />
+        <pointLight position={[100, 100, 100]} intensity={1.0} />
 
         {/* Helper lines */}
         <axesHelper args={[5]} />
         <gridHelper args={[20, 20]} />
 
-        <SpinningCube position={[0, 1, 0]} />
-        <FloorPlane position={[0, -1, 0]} />
-        <CustomTorus position={[3, 1, 0]} />
-        <TexturedSphere position={[-3, 1, 0]} />
-        <MeshToonCube position={[0, 1, -3]} />
+        <Physics
+          gravity={[0, -9.81, 0]}
+          broadphase="SAP"
+          defaultContactMaterial={{
+            contactEquationRelaxation: 4,
+            friction: 1e-3,
+          }}
+          allowSleep={false}
+        >
+          {physicsReady && (
+            <>
+              <FloorPlane position={[0, 0, 0]} />
+              <Car position={[0, 2, 0]} resetTrigger={resetTrigger} />
+              <TexturedSphere position={[-3, 10, 0]} />
+            </>
+          )}
+        </Physics>
+
+        <SpinningCube position={[0, 100, 0]} />
+        <CustomTorus position={[3, 10, 0]} />
+        <MeshToonCube position={[0, 10, -3]} />
 
         <PerformanceTracker onMetricsUpdate={setPerformanceMetrics} />
         <OrbitControls enableZoom={true} />
@@ -67,6 +106,14 @@ export const MainPage = () => {
         postProcessingSettings={postProcessingSettings}
         onPostProcessingChange={setPostProcessingSettings}
       />
+
+      <button
+        onClick={handleReset}
+        className={styles.resetButton}
+        type="button"
+      >
+        Reset
+      </button>
     </div>
   )
 }

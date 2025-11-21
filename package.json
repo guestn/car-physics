@@ -18,6 +18,7 @@
     "stylelint:fix": "stylelint \"src/**/*.{css,scss}\" --fix"
   },
   "dependencies": {
+    "@react-three/cannon": "^6.6.0",
     "@react-three/drei": "^10.7.6",
     "@react-three/fiber": "^9.4.0",
     "@react-three/postprocessing": "^3.0.4",

@@ -1,6 +1,7 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { useFrame, useLoader } from '@react-three/fiber'
 import { Mesh, TextureLoader } from 'three'
+import { useSphere } from '@react-three/cannon'
 import { getCSSVariable } from '@/utils/colorUtils'
 
 interface TexturedSphereProps {
@@ -10,7 +11,24 @@ interface TexturedSphereProps {
 export const TexturedSphere = ({
   position = [0, 0, 0],
 }: TexturedSphereProps) => {
-  const meshRef = useRef<Mesh>(null!)
+  // Add physics body to test if physics is working
+  const [ref, api] = useSphere(() => ({
+    mass: 1,
+    position,
+    args: [1],
+  }))
+
+  // Debug: Check if physics is working
+  useEffect(() => {
+    if (api) {
+      console.log('Sphere physics API ready:', api)
+      // Subscribe to position to see if it's updating
+      const unsubscribe = api.position.subscribe((pos) => {
+        //   console.log('Sphere position:', pos)
+      })
+      return unsubscribe
+    }
+  }, [api])
 
   // Load textures using CSS variables
   const [diffuseTexture, bumpTexture] = useLoader(TextureLoader, [
@@ -54,15 +72,15 @@ export const TexturedSphere = ({
   ])
 
   useFrame(() => {
-    if (meshRef.current) {
+    if (ref.current) {
       // Slow rotation
-      meshRef.current.rotation.x += 0.005
-      meshRef.current.rotation.y += 0.01
+      ref.current.rotation.x += 0.005
+      ref.current.rotation.y += 0.01
     }
   })
 
   return (
-    <mesh ref={meshRef} position={position} castShadow receiveShadow>
+    <mesh ref={ref} castShadow receiveShadow>
       <sphereGeometry args={[1, 32, 32]} />
       <meshStandardMaterial
         map={diffuseTexture}

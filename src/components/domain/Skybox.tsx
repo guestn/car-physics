@@ -36,7 +36,7 @@ export const Skybox = ({
 
   return (
     <mesh ref={skyboxRef} position={position}>
-      <boxGeometry args={[100, 100, 100]} />
+      <boxGeometry args={[1000, 1000, 1000]} />
       <meshBasicMaterial map={skyTexture} side={DoubleSide} fog={false} />
     </mesh>
   )
