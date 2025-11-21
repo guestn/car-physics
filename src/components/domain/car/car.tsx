@@ -261,14 +261,20 @@ export const Car = ({ position = [0, 0, 0], resetTrigger }: CarProps) => {
   const maxSteeringValue = 0.5;
   const steeringSpeed = 1.0; // radians per second
   const steeringValueRef = useRef(0);
+  const lastResetTriggerRef = useRef(0);
 
   // Reset function - triggered when resetTrigger changes
   useEffect(() => {
     if (
       resetTrigger !== undefined &&
       resetTrigger > 0 &&
-      chassisApiRef.current
+      resetTrigger !== lastResetTriggerRef.current &&
+      chassisApiRef.current &&
+      vehicleApi
     ) {
+      // Track that we've processed this reset trigger
+      lastResetTriggerRef.current = resetTrigger;
+
       // Reset chassis position and rotation
       chassisApiRef.current.position.set(
         position[0],
