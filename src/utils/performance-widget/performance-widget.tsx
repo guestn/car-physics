@@ -8,10 +8,17 @@ export interface PerformanceMetrics {
   memoryUsage?: number;
 }
 
+export interface DebugSettings {
+  wireframe: boolean;
+  physicsDebug: boolean;
+}
+
 interface PerformanceWidgetProps {
   metrics: PerformanceMetrics;
   postProcessingSettings: PostProcessingSettings;
   onPostProcessingChange: (settings: PostProcessingSettings) => void;
+  debugSettings?: DebugSettings;
+  onDebugChange?: (settings: DebugSettings) => void;
 }
 
 export const PerformanceTracker = ({
@@ -86,12 +93,15 @@ export const PerformanceWidget = ({
   metrics,
   postProcessingSettings,
   onPostProcessingChange,
+  debugSettings,
+  onDebugChange,
 }: PerformanceWidgetProps) => {
   const [isVisible, setIsVisible] = useState(true);
   const [position, setPosition] = useState({ x: 20, y: 80 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [showPostProcessing, setShowPostProcessing] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
 
   const getFpsColor = (fps: number): string => {
@@ -183,6 +193,15 @@ export const PerformanceWidget = ({
           >
             🎨
           </button>
+          {debugSettings && onDebugChange && (
+            <button
+              className={styles.toggleButton}
+              onClick={() => setShowDebug(!showDebug)}
+              title="Toggle Debug Controls"
+            >
+              🐛
+            </button>
+          )}
           <button
             className={styles.closeButton}
             onClick={toggleVisibility}
@@ -275,6 +294,40 @@ export const PerformanceWidget = ({
                 }
               />
               <span className={styles.checkboxText}>Depth of Field</span>
+            </label>
+          </div>
+        </div>
+      )}
+
+      {showDebug && debugSettings && onDebugChange && (
+        <div className={styles.postProcessingControls}>
+          <h4 className={styles.sectionTitle}>Debug Options</h4>
+          <div className={styles.checkboxGroup}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={debugSettings.wireframe}
+                onChange={(e) =>
+                  onDebugChange({
+                    ...debugSettings,
+                    wireframe: e.target.checked,
+                  })
+                }
+              />
+              <span className={styles.checkboxText}>Car Wireframe</span>
+            </label>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={debugSettings.physicsDebug}
+                onChange={(e) =>
+                  onDebugChange({
+                    ...debugSettings,
+                    physicsDebug: e.target.checked,
+                  })
+                }
+              />
+              <span className={styles.checkboxText}>Physics Debug</span>
             </label>
           </div>
         </div>

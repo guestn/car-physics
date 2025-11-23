@@ -48,27 +48,29 @@ export const applyCarWheelMaterials = (scene: Object3D) => {
       child.castShadow = true;
       child.receiveShadow = true;
 
+      console.log({ child });
+
+      const carWheelMaterialOverrides = {
+        metalness: 0.1,
+        roughness: 0.0,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.2,
+      };
+
       if (child.material) {
-        const material = child.material as Material;
-        material.dithering = true;
+        const originalMaterial = child.material as Material;
+        if ((child.name = 'Tire')) {
+          const carWheelMaterialOverrides = {
+            metalness: 0.1,
+            roughness: 0.5,
+            clearcoat: 0,
+          };
 
-        if ('map' in material && material.map) {
-          const texture = material.map as Texture;
-          texture.colorSpace = 'srgb';
-          texture.generateMipmaps = true;
-          texture.minFilter = LinearMipmapLinearFilter;
-          texture.magFilter = LinearFilter;
-        }
-
-        // Set proper color space for other texture maps
-        if ('normalMap' in material && material.normalMap) {
-          (material.normalMap as Texture).colorSpace = 'srgb';
-        }
-        if ('roughnessMap' in material && material.roughnessMap) {
-          (material.roughnessMap as Texture).colorSpace = 'srgb';
-        }
-        if ('metalnessMap' in material && material.metalnessMap) {
-          (material.metalnessMap as Texture).colorSpace = 'srgb';
+          const physicalMaterial = convertToPhysicalMaterial(
+            originalMaterial,
+            carWheelMaterialOverrides
+          );
+          child.material = physicalMaterial;
         }
       }
     }

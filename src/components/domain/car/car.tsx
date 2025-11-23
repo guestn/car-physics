@@ -1,166 +1,32 @@
-import { useRef, useEffect, forwardRef, useMemo } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useBox, useRaycastVehicle, useCylinder } from '@react-three/cannon';
-import { useGLTF } from '@react-three/drei';
+import { useRaycastVehicle } from '@react-three/cannon';
 import { Object3D } from 'three';
-import { applyCarChassisMaterials, applyCarWheelMaterials } from './material';
-import type { Ref, RefObject } from 'react';
-import type { BoxProps } from '@react-three/cannon';
-
-useGLTF.preload('/models/1972_porsche_911_carrera_rs/porsche_rs_wheel.gltf');
-useGLTF.preload('/models/porsche_rs_body.gltf');
+import type { Ref } from 'react';
+import { Wheel } from './wheel';
+import { Chassis } from './chassis';
 
 interface CarProps {
   position?: [number, number, number];
   resetTrigger?: number;
 }
 
-interface WheelProps {
-  radius: number;
-  width: number;
-  isLeft?: boolean;
-}
-
-interface ChassisProps extends BoxProps {
-  chassisYOffset: number;
-  onApiReady?: (api: any) => void;
-}
-
-const Chassis = forwardRef<Object3D, ChassisProps>(
-  (
-    {
-      args = [1.5, 0.5, 4.5],
-      mass = 1500,
-      chassisYOffset,
-      onApiReady,
-      ...props
-    },
-    ref
-  ) => {
-    // Load the Porsche GLTF model
-    const { scene } = useGLTF(
-      '/models/1972_porsche_911_carrera_rs/porsche_rs_body.gltf'
-    );
-
-    // Clone the scene to avoid sharing state between instances
-    const clonedScene = useMemo(() => scene.clone(), [scene]);
-
-    const [, api] = useBox(
-      () => ({
-        mass,
-        args,
-        allowSleep: false,
-        linearDamping: 0.0,
-        angularDamping: 0.4,
-        ...props,
-      }),
-      ref as RefObject<Object3D>
-    );
-
-    useEffect(() => {
-      if (onApiReady) {
-        onApiReady(api);
-      }
-    }, [api, onApiReady]);
-
-    // Scale and position the model to match the physics body
-    useEffect(() => {
-      if (clonedScene) {
-        const targetLength = args[2]; // Z dimension (length)
-        const scale = targetLength / 4.5; // Approximate model length
-        clonedScene.scale.set(scale, scale, scale);
-
-        // Rotate 180 degrees around Y axis to fix reversed Z axis
-        clonedScene.rotation.y = Math.PI;
-
-        // Center the model relative to the physics body
-        clonedScene.position.set(0, -0.75, 0);
-
-        applyCarChassisMaterials(clonedScene);
-      }
-    }, [clonedScene, args]);
-
-    return (
-      <group ref={ref} dispose={null}>
-        <primitive object={clonedScene} />
-      </group>
-    );
-  }
-);
-
-Chassis.displayName = 'Chassis';
-
-const Wheel = forwardRef<Object3D, WheelProps>(
-  ({ radius, width, isLeft = false }, ref) => {
-    const { scene } = useGLTF(
-      '/models/1972_porsche_911_carrera_rs/porsche_rs_wheel.gltf'
-    );
-
-    const clonedScene = useMemo(() => scene.clone(), [scene]);
-
-    // Create a ref for the wheel visual group to control rotation separately
-    const wheelVisualRef = useRef<Object3D>(null!);
-
-    // Create physics body for the wheel - vehicle system will control position
-    useCylinder(
-      () => ({
-        mass: 50,
-        type: 'Kinematic',
-        material: 'wheel',
-        collisionFilterGroup: 0,
-        rotation: [0, 0, -Math.PI / 2],
-        args: [radius, radius, width, 16],
-      }),
-      ref as RefObject<Object3D>,
-      [radius, width]
-    );
-
-    // Scale and position the wheel model to match the physics body
-    useEffect(() => {
-      if (clonedScene) {
-        // Scale the wheel to match the radius
-        const scale = radius / 0.3;
-        clonedScene.scale.set(scale, scale, scale);
-
-        // Center the wheel model
-        clonedScene.position.set(0, 0, 0);
-
-        // No rotation
-        clonedScene.rotation.set(0, 0, 0);
-
-        // Apply materials to wheels
-        applyCarWheelMaterials(clonedScene);
-      }
-    }, [clonedScene, radius, isLeft]);
-
-    return (
-      <group ref={ref} dispose={null}>
-        <group ref={wheelVisualRef} dispose={null}>
-          <primitive object={clonedScene} />
-        </group>
-      </group>
-    );
-  }
-);
-
-Wheel.displayName = 'Wheel';
-
 export const Car = ({ position = [0, 0, 0], resetTrigger }: CarProps) => {
   // Car dimensions
   const chassisSize = useMemo(
-    () => [1.5, 0.5, 4.5] as [number, number, number],
+    () => [1.65, 1.33, 4.1] as [number, number, number],
     []
   );
-  const wheelRadius = 0.31;
-  const wheelWidth = 0.3;
-  const wheelbase = 2.26; // Distance between front and back wheels (Z axis - forward is -Z)
-  const trackWidth = 2.8; // Distance between left and right wheels (X axis)
+  const wheelRadius = 0.3;
+  const wheelWidth = 0.25;
+  const wheelbase = 2.5; // Distance between front and back wheels (Z axis - forward is -Z)
+  const trackWidth = 3.6; // Distance between left and right wheels (X axis)
 
   // Wheel positions relative to chassis center
   const front = -wheelbase / 2 - 0.06; // Front wheels (negative Z)
-  const back = wheelbase / 2 - 0.06; // Back wheels (positive Z)
+  const back = wheelbase / 2 - 0.09; // Back wheels (positive Z)
   const width = trackWidth / 2; // Half track width for sideMulti calculation
-  const height = -chassisSize[1] / 2; // Below chassis center
+  const height = -0.2; //-chassisSize[1] / 2 + 0.05; // Below chassis center
 
   // Chassis position offset (raised to sit on wheels)
   const chassisYOffset = useMemo(
@@ -197,17 +63,17 @@ export const Car = ({ position = [0, 0, 0], resetTrigger }: CarProps) => {
     () => ({
       radius: wheelRadius,
       directionLocal: [0, -1, 0] as [number, number, number],
-      axleLocal: [-1, 0, 0] as [number, number, number],
+      axleLocal: [-1, 0, 0] as [number, number, number], // direction of rotation
       suspensionStiffness: 50,
       suspensionRestLength: 0.3,
-      frictionSlip: 1.2,
+      frictionSlip: 1.8,
       dampingRelaxation: 2.3,
       dampingCompression: 4.4,
       maxSuspensionForce: 100000,
       rollInfluence: 0.01,
       maxSuspensionTravel: 0.3,
-      customSlidingRotationalSpeed: -30,
-      useCustomSlidingRotationalSpeed: true,
+      // customSlidingRotationalSpeed: -30,
+      // useCustomSlidingRotationalSpeed: true,
     }),
     [wheelRadius]
   );
@@ -239,7 +105,7 @@ export const Car = ({ position = [0, 0, 0], resetTrigger }: CarProps) => {
       return {
         chassisBody: chassisRef as Ref<Object3D>,
         wheels: wheelRefs as Ref<Object3D>[],
-        wheelInfos: wheelInfos,
+        wheelInfos,
         indexForwardAxis: 2, // Z axis is forward
         indexRightAxis: 0, // X axis is right
         indexUpAxis: 1, // Y axis is up
@@ -411,6 +277,7 @@ export const Car = ({ position = [0, 0, 0], resetTrigger }: CarProps) => {
       <Chassis
         ref={chassisRef}
         args={chassisSize}
+        mass={1500}
         position={[position[0], position[1] + chassisYOffset, position[2]]}
         chassisYOffset={0}
         onApiReady={handleChassisApiReady}

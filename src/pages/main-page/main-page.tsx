@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { useState, useEffect } from 'react';
-import { Physics } from '@react-three/cannon';
+import { Physics, Debug } from '@react-three/cannon';
 import { FloorPlane } from '@/components/domain/floor-plane/floor-plane';
 import { Skybox } from '@/components/domain/skybox/skybox';
 import { Car } from '@/components/domain/car/car';
@@ -14,7 +14,11 @@ import { PostProcessingEffects } from '@/effects/post-processing-effects';
 import type { PostProcessingSettings } from '@/effects/post-processing-effects';
 import styles from './main-page.module.css';
 
-export const MainPage = () => {
+interface MainPageProps {
+  resetTrigger?: number;
+}
+
+export const MainPage = ({ resetTrigger = 0 }: MainPageProps) => {
   const [performanceMetrics, setPerformanceMetrics] =
     useState<PerformanceMetrics>({
       fps: 0,
@@ -30,12 +34,12 @@ export const MainPage = () => {
       outline: false,
     });
 
-  const [resetTrigger, setResetTrigger] = useState(0);
-  const [physicsReady, setPhysicsReady] = useState(false);
+  const [debugSettings, setDebugSettings] = useState({
+    wireframe: false,
+    physicsDebug: true,
+  });
 
-  const handleReset = () => {
-    setResetTrigger((prev) => prev + 1);
-  };
+  const [physicsReady, setPhysicsReady] = useState(false);
 
   // Wait for next frame to ensure Canvas is ready before initializing physics
   useEffect(() => {
@@ -85,12 +89,21 @@ export const MainPage = () => {
           }}
           allowSleep={false}
         >
-          {physicsReady && (
-            <>
-              <FloorPlane position={[0, 0, 0]} />
-              <Car position={[0, 2, 0]} resetTrigger={resetTrigger} />
-            </>
-          )}
+          {debugSettings.physicsDebug
+            ? physicsReady && (
+                <Debug color="red" scale={1.1}>
+                  <>
+                    <FloorPlane position={[0, 0, 0]} />
+                    <Car position={[0, 2, 0]} resetTrigger={resetTrigger} />
+                  </>
+                </Debug>
+              )
+            : physicsReady && (
+                <>
+                  <FloorPlane position={[0, 0, 0]} />
+                  <Car position={[0, 2, 0]} resetTrigger={resetTrigger} />
+                </>
+              )}
         </Physics>
 
         <PerformanceTracker onMetricsUpdate={setPerformanceMetrics} />
@@ -103,15 +116,9 @@ export const MainPage = () => {
         metrics={performanceMetrics}
         postProcessingSettings={postProcessingSettings}
         onPostProcessingChange={setPostProcessingSettings}
+        debugSettings={debugSettings}
+        onDebugChange={setDebugSettings}
       />
-
-      <button
-        onClick={handleReset}
-        className={styles.resetButton}
-        type="button"
-      >
-        Reset
-      </button>
     </div>
   );
 };
