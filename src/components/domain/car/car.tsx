@@ -2,16 +2,21 @@ import { useRef, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useRaycastVehicle } from '@react-three/cannon';
 import { Object3D } from 'three';
-import type { Ref } from 'react';
+import type { Ref, RefObject } from 'react';
 import { Wheel } from './wheel';
 import { Chassis } from './chassis';
 
 interface CarProps {
   position?: [number, number, number];
   resetTrigger?: number;
+  onChassisRefReady?: (ref: RefObject<Object3D>) => void;
 }
 
-export const Car = ({ position = [0, 0, 0], resetTrigger }: CarProps) => {
+export const Car = ({
+  position = [0, 0, 0],
+  resetTrigger,
+  onChassisRefReady,
+}: CarProps) => {
   // Car dimensions
   const chassisSize = useMemo(
     () => [1.65, 1.33, 4.1] as [number, number, number],
@@ -37,6 +42,13 @@ export const Car = ({ position = [0, 0, 0], resetTrigger }: CarProps) => {
   // Chassis ref and API
   const chassisRef = useRef<Object3D>(null!);
   const chassisApiRef = useRef<any>(null);
+
+  // Expose chassis ref to parent
+  useEffect(() => {
+    if (onChassisRefReady) {
+      onChassisRefReady(chassisRef);
+    }
+  }, [onChassisRefReady]);
 
   // Callback to receive chassis API
   const handleChassisApiReady = (api: any) => {

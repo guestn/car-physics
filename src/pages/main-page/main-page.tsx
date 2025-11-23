@@ -1,10 +1,12 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Physics, Debug } from '@react-three/cannon';
 import { FloorPlane } from '@/components/domain/floor-plane/floor-plane';
 import { Skybox } from '@/components/domain/skybox/skybox';
 import { Car } from '@/components/domain/car/car';
+import { FollowCamera } from '@/components/domain/camera/follow-camera';
+import { Object3D } from 'three';
 import {
   PerformanceWidget,
   PerformanceTracker,
@@ -16,9 +18,14 @@ import styles from './main-page.module.css';
 
 interface MainPageProps {
   resetTrigger?: number;
+  cameraMode?: 'orbit' | 'follow';
+  onCameraModeChange?: (mode: 'orbit' | 'follow') => void;
 }
 
-export const MainPage = ({ resetTrigger = 0 }: MainPageProps) => {
+export const MainPage = ({
+  resetTrigger = 0,
+  cameraMode: externalCameraMode,
+}: MainPageProps) => {
   const [performanceMetrics, setPerformanceMetrics] =
     useState<PerformanceMetrics>({
       fps: 0,
@@ -39,7 +46,14 @@ export const MainPage = ({ resetTrigger = 0 }: MainPageProps) => {
     physicsDebug: true,
   });
 
+  const [internalCameraMode, setInternalCameraMode] = useState<
+    'orbit' | 'follow'
+  >('orbit');
+  const carChassisRef = useRef<Object3D>(null!);
   const [physicsReady, setPhysicsReady] = useState(false);
+
+  // Use external camera mode if provided, otherwise use internal state
+  const cameraMode = externalCameraMode ?? internalCameraMode;
 
   // Wait for next frame to ensure Canvas is ready before initializing physics
   useEffect(() => {
@@ -52,6 +66,13 @@ export const MainPage = ({ resetTrigger = 0 }: MainPageProps) => {
     });
     return () => cancelAnimationFrame(frameId);
   }, []);
+
+  // Update internal state when external mode changes
+  useEffect(() => {
+    if (externalCameraMode !== undefined) {
+      setInternalCameraMode(externalCameraMode);
+    }
+  }, [externalCameraMode]);
 
   //const ToggledDebug = useToggle(Debug, 'ToggledDebug')
 
@@ -94,20 +115,35 @@ export const MainPage = ({ resetTrigger = 0 }: MainPageProps) => {
                 <Debug color="red" scale={1.1}>
                   <>
                     <FloorPlane position={[0, 0, 0]} />
-                    <Car position={[0, 2, 0]} resetTrigger={resetTrigger} />
+                    <Car
+                      position={[0, 2, 0]}
+                      resetTrigger={resetTrigger}
+                      onChassisRefReady={(ref) => {
+                        carChassisRef.current = ref.current;
+                      }}
+                    />
                   </>
                 </Debug>
               )
             : physicsReady && (
                 <>
                   <FloorPlane position={[0, 0, 0]} />
-                  <Car position={[0, 2, 0]} resetTrigger={resetTrigger} />
+                  <Car
+                    position={[0, 2, 0]}
+                    resetTrigger={resetTrigger}
+                    onChassisRefReady={(ref) => {
+                      carChassisRef.current = ref.current;
+                    }}
+                  />
                 </>
               )}
         </Physics>
 
         <PerformanceTracker onMetricsUpdate={setPerformanceMetrics} />
-        <OrbitControls enableZoom={true} />
+        {cameraMode === 'orbit' && <OrbitControls enableZoom={true} />}
+        {cameraMode === 'follow' && (
+          <FollowCamera target={carChassisRef} offset={[0, 3, 13]} />
+        )}
 
         <PostProcessingEffects settings={postProcessingSettings} />
       </Canvas>

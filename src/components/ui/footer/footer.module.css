@@ -21,6 +21,12 @@
   margin: 0;
 }
 
+.footerButtons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .resetButton {
   padding: 12px 24px;
   background-color: rgba(0, 0, 0, 0.7);
