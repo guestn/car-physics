@@ -48,8 +48,6 @@ export const applyCarWheelMaterials = (scene: Object3D) => {
       child.castShadow = true;
       child.receiveShadow = true;
 
-      console.log({ child });
-
       const carWheelMaterialOverrides = {
         metalness: 0.1,
         roughness: 0.0,

@@ -6,7 +6,8 @@ import { FloorPlane } from '@/components/domain/floor-plane/floor-plane';
 import { Skybox } from '@/components/domain/skybox/skybox';
 import { Car } from '@/components/domain/car/car';
 import { FollowCamera } from '@/components/domain/camera/follow-camera';
-import { Object3D } from 'three';
+import { FollowShadowCamera } from '@/components/domain/camera/follow-shadow-camera';
+import { Object3D, DirectionalLight } from 'three';
 import {
   PerformanceWidget,
   PerformanceTracker,
@@ -19,6 +20,7 @@ import styles from './main-page.module.css';
 
 const POST_PROCESSING_STORAGE_KEY = 'car-physics:post-processing-settings';
 const CAMERA_MODE_STORAGE_KEY = 'car-physics:camera-mode';
+const DEBUG_SETTINGS_STORAGE_KEY = 'car-physics:debug-settings';
 
 interface MainPageProps {
   resetTrigger?: number;
@@ -52,15 +54,26 @@ export const MainPage = ({
       );
     });
 
-  // Save post-processing settings to localStorage whenever they change
   useEffect(() => {
     setToLocalStorage(POST_PROCESSING_STORAGE_KEY, postProcessingSettings);
   }, [postProcessingSettings]);
 
-  const [debugSettings, setDebugSettings] = useState({
+  const defaultDebugSettings = {
     wireframe: false,
     physicsDebug: true,
+  };
+
+  const [debugSettings, setDebugSettings] = useState(() => {
+    return getFromLocalStorage(
+      DEBUG_SETTINGS_STORAGE_KEY,
+      defaultDebugSettings
+    );
   });
+
+  // Save debug settings to localStorage whenever they change
+  useEffect(() => {
+    setToLocalStorage(DEBUG_SETTINGS_STORAGE_KEY, debugSettings);
+  }, [debugSettings]);
 
   const [internalCameraMode, setInternalCameraMode] = useState<
     'orbit' | 'follow'
@@ -71,39 +84,33 @@ export const MainPage = ({
     );
   });
 
-  // Save internal camera mode to localStorage whenever it changes
   useEffect(() => {
     if (externalCameraMode === undefined) {
-      // Only save if we're using internal mode (no external mode provided)
       setToLocalStorage(CAMERA_MODE_STORAGE_KEY, internalCameraMode);
     }
   }, [internalCameraMode, externalCameraMode]);
   const carChassisRef = useRef<Object3D>(null!);
+  const directionalLightRef = useRef<DirectionalLight>(null!);
   const [physicsReady, setPhysicsReady] = useState(false);
 
-  // Use external camera mode if provided, otherwise use internal state
   const cameraMode = externalCameraMode ?? internalCameraMode;
 
   // Wait for next frame to ensure Canvas is ready before initializing physics
   useEffect(() => {
     // Use requestAnimationFrame to wait for Canvas to be ready
     const frameId = requestAnimationFrame(() => {
-      // Then wait a bit more for worker thread
       setTimeout(() => {
         setPhysicsReady(true);
-      }, 200);
+      }, 100);
     });
     return () => cancelAnimationFrame(frameId);
   }, []);
 
-  // Update internal state when external mode changes
   useEffect(() => {
     if (externalCameraMode !== undefined) {
       setInternalCameraMode(externalCameraMode);
     }
   }, [externalCameraMode]);
-
-  //const ToggledDebug = useToggle(Debug, 'ToggledDebug')
 
   return (
     <div className={styles.mainPage}>
@@ -122,7 +129,20 @@ export const MainPage = ({
         <Skybox position={[0, 10, 0]} />
 
         <ambientLight intensity={0.3} />
-        <directionalLight position={[50, 150, 50]} intensity={6.0} castShadow />
+        <directionalLight
+          ref={directionalLightRef}
+          position={[50, 150, 50]}
+          intensity={6.0}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-near={0.1}
+          shadow-camera-far={200}
+          shadow-camera-left={-50}
+          shadow-camera-right={50}
+          shadow-camera-top={50}
+          shadow-camera-bottom={-50}
+        />
         {/* <directionalLight position={[-5, 10, -5]} intensity={1.8} /> */}
         <pointLight position={[100, 100, 100]} intensity={1.0} />
 
@@ -173,6 +193,12 @@ export const MainPage = ({
         {cameraMode === 'follow' && (
           <FollowCamera target={carChassisRef} offset={[0, 3, 13]} />
         )}
+        <FollowShadowCamera
+          target={carChassisRef}
+          lightRef={directionalLightRef}
+          shadowSize={50}
+          shadowDistance={200}
+        />
 
         <PostProcessingEffects settings={postProcessingSettings} />
       </Canvas>
