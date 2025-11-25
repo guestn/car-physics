@@ -14,7 +14,11 @@ import {
 import type { PerformanceMetrics } from '@/utils/performance-widget/performance-widget';
 import { PostProcessingEffects } from '@/effects/post-processing-effects';
 import type { PostProcessingSettings } from '@/effects/post-processing-effects';
+import { getFromLocalStorage, setToLocalStorage } from '@/utils/local-storage';
 import styles from './main-page.module.css';
+
+const POST_PROCESSING_STORAGE_KEY = 'car-physics:post-processing-settings';
+const CAMERA_MODE_STORAGE_KEY = 'car-physics:camera-mode';
 
 interface MainPageProps {
   resetTrigger?: number;
@@ -32,14 +36,26 @@ export const MainPage = ({
       frameTime: 0,
     });
 
+  const defaultPostProcessingSettings: PostProcessingSettings = {
+    bloom: false,
+    vignette: false,
+    noise: false,
+    depthOfField: false,
+    outline: false,
+  };
+
   const [postProcessingSettings, setPostProcessingSettings] =
-    useState<PostProcessingSettings>({
-      bloom: false,
-      vignette: false,
-      noise: false,
-      depthOfField: false,
-      outline: false,
+    useState<PostProcessingSettings>(() => {
+      return getFromLocalStorage<PostProcessingSettings>(
+        POST_PROCESSING_STORAGE_KEY,
+        defaultPostProcessingSettings
+      );
     });
+
+  // Save post-processing settings to localStorage whenever they change
+  useEffect(() => {
+    setToLocalStorage(POST_PROCESSING_STORAGE_KEY, postProcessingSettings);
+  }, [postProcessingSettings]);
 
   const [debugSettings, setDebugSettings] = useState({
     wireframe: false,
@@ -48,7 +64,20 @@ export const MainPage = ({
 
   const [internalCameraMode, setInternalCameraMode] = useState<
     'orbit' | 'follow'
-  >('orbit');
+  >(() => {
+    return getFromLocalStorage<'orbit' | 'follow'>(
+      CAMERA_MODE_STORAGE_KEY,
+      'orbit'
+    );
+  });
+
+  // Save internal camera mode to localStorage whenever it changes
+  useEffect(() => {
+    if (externalCameraMode === undefined) {
+      // Only save if we're using internal mode (no external mode provided)
+      setToLocalStorage(CAMERA_MODE_STORAGE_KEY, internalCameraMode);
+    }
+  }, [internalCameraMode, externalCameraMode]);
   const carChassisRef = useRef<Object3D>(null!);
   const [physicsReady, setPhysicsReady] = useState(false);
 
