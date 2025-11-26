@@ -5,6 +5,7 @@ import { Physics, Debug } from '@react-three/cannon';
 import { FloorPlane } from '@/components/domain/floor-plane/floor-plane';
 import { Skybox } from '@/components/domain/skybox/skybox';
 import { Car } from '@/components/domain/car/car';
+import { Speedometer } from '@/components/domain/car/speedometer';
 import { FollowCamera } from '@/components/domain/camera/follow-camera';
 import { FollowShadowCamera } from '@/components/domain/camera/follow-shadow-camera';
 import { Object3D, DirectionalLight } from 'three';
@@ -13,6 +14,7 @@ import {
   PerformanceTracker,
 } from '@/utils/performance-widget/performance-widget';
 import type { PerformanceMetrics } from '@/utils/performance-widget/performance-widget';
+import { SpeedDisplay } from '@/components/ui/speed-display/speed-display';
 import { PostProcessingEffects } from '@/effects/post-processing-effects';
 import type { PostProcessingSettings } from '@/effects/post-processing-effects';
 import { getFromLocalStorage, setToLocalStorage } from '@/utils/local-storage';
@@ -90,6 +92,9 @@ export const MainPage = ({
     }
   }, [internalCameraMode, externalCameraMode]);
   const carChassisRef = useRef<Object3D>(null!);
+  const carChassisApiRef = useRef<any>(null);
+  const carVehicleApiRef = useRef<any>(null);
+  const carSteeringValueRef = useRef<React.RefObject<number> | null>(null);
   const directionalLightRef = useRef<DirectionalLight>(null!);
   const [physicsReady, setPhysicsReady] = useState(false);
 
@@ -134,21 +139,21 @@ export const MainPage = ({
           position={[50, 150, 50]}
           intensity={6.0}
           castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-camera-near={0.1}
-          shadow-camera-far={200}
-          shadow-camera-left={-50}
-          shadow-camera-right={50}
-          shadow-camera-top={50}
-          shadow-camera-bottom={-50}
+          // shadow-mapSize-width={2048}
+          // shadow-mapSize-height={2048}
+          // shadow-camera-near={0.1}
+          // shadow-camera-far={200}
+          // shadow-camera-left={-50}
+          // shadow-camera-right={50}
+          // shadow-camera-top={50}
+          // shadow-camera-bottom={-50}
         />
         {/* <directionalLight position={[-5, 10, -5]} intensity={1.8} /> */}
         <pointLight position={[100, 100, 100]} intensity={1.0} />
 
         {/* Helper lines */}
         <axesHelper args={[5]} />
-        <gridHelper args={[20, 20]} />
+        {/* <gridHelper args={[20, 20]} /> */}
 
         <Physics
           gravity={[0, -9.81, 0]}
@@ -170,6 +175,15 @@ export const MainPage = ({
                       onChassisRefReady={(ref) => {
                         carChassisRef.current = ref.current;
                       }}
+                      onChassisApiReady={(api) => {
+                        carChassisApiRef.current = api;
+                      }}
+                      onVehicleApiReady={(api) => {
+                        carVehicleApiRef.current = api;
+                      }}
+                      onSteeringValueReady={(ref) => {
+                        carSteeringValueRef.current = ref;
+                      }}
                     />
                   </>
                 </Debug>
@@ -183,15 +197,40 @@ export const MainPage = ({
                     onChassisRefReady={(ref) => {
                       carChassisRef.current = ref.current;
                     }}
+                    onChassisApiReady={(api) => {
+                      carChassisApiRef.current = api;
+                    }}
+                    onVehicleApiReady={(api) => {
+                      carVehicleApiRef.current = api;
+                    }}
+                    onSteeringValueReady={(ref) => {
+                      carSteeringValueRef.current = ref;
+                    }}
                   />
                 </>
               )}
         </Physics>
 
         <PerformanceTracker onMetricsUpdate={setPerformanceMetrics} />
+
+        {carChassisApiRef.current && (
+          <Speedometer
+            chassisApi={carChassisApiRef.current}
+            onSpeedUpdate={(speedKmh: number) => {
+              setPerformanceMetrics((prev) => ({
+                ...prev,
+                speed: speedKmh,
+              }));
+            }}
+          />
+        )}
         {cameraMode === 'orbit' && <OrbitControls enableZoom={true} />}
         {cameraMode === 'follow' && (
-          <FollowCamera target={carChassisRef} offset={[0, 3, 13]} />
+          <FollowCamera
+            target={carChassisRef}
+            offset={[0, 2.5, 13]}
+            steeringValueRef={carSteeringValueRef.current}
+          />
         )}
         <FollowShadowCamera
           target={carChassisRef}
@@ -210,6 +249,10 @@ export const MainPage = ({
         debugSettings={debugSettings}
         onDebugChange={setDebugSettings}
       />
+
+      {performanceMetrics.speed !== undefined && (
+        <SpeedDisplay speed={performanceMetrics.speed} />
+      )}
     </div>
   );
 };

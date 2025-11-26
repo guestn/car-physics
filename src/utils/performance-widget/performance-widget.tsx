@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from './performance-widget.module.css';
 import type { PostProcessingSettings } from '@/effects/post-processing-effects';
 
@@ -6,6 +6,7 @@ export interface PerformanceMetrics {
   fps: number;
   frameTime: number;
   memoryUsage?: number;
+  speed?: number; // Speed in km/h
 }
 
 export interface DebugSettings {
@@ -99,7 +100,7 @@ export const PerformanceWidget = ({
   const [isVisible, setIsVisible] = useState(true);
   const [position, setPosition] = useState({ x: 20, y: 80 });
   const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
   const [showPostProcessing, setShowPostProcessing] = useState(false);
   const [showDebug, setShowDebug] = useState(false);
   const widgetRef = useRef<HTMLDivElement>(null);
@@ -114,48 +115,43 @@ export const PerformanceWidget = ({
     setIsVisible(!isVisible);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (
-      e.target === e.currentTarget ||
-      (e.target as HTMLElement).closest('.widget-header')
-    ) {
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Only allow dragging from the header, but not from buttons
+    const target = e.target as HTMLElement;
+    const isButton = target.tagName === 'BUTTON' || target.closest('button');
+
+    if (!isButton) {
+      e.preventDefault();
       setIsDragging(true);
       const rect = widgetRef.current?.getBoundingClientRect();
       if (rect) {
-        setDragOffset({
+        dragOffsetRef.current = {
           x: e.clientX - rect.left,
           y: e.clientY - rect.top,
-        });
+        };
       }
+      // Capture pointer to track movement even outside the element
+      const headerElement = e.currentTarget as HTMLElement;
+      headerElement.setPointerCapture(e.pointerId);
     }
   };
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (isDragging) {
-        setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
-        });
-      }
-    },
-    [isDragging, dragOffset]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  useEffect(() => {
+  const handlePointerMove = (e: React.PointerEvent) => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
+      e.preventDefault();
+      setPosition({
+        x: e.clientX - dragOffsetRef.current.x,
+        y: e.clientY - dragOffsetRef.current.y,
+      });
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    setIsDragging(false);
+    if (widgetRef.current) {
+      widgetRef.current.releasePointerCapture(e.pointerId);
+    }
+  };
 
   if (!isVisible) {
     return (
@@ -181,9 +177,14 @@ export const PerformanceWidget = ({
         left: `${position.x}px`,
         top: `${position.y}px`,
       }}
-      onMouseDown={handleMouseDown}
     >
-      <div className={`${styles.header} widget-header`}>
+      <div
+        className={`${styles.header} widget-header`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
         <h3 className={styles.title}>Performance</h3>
         <div className={styles.headerButtons}>
           <button
@@ -232,6 +233,14 @@ export const PerformanceWidget = ({
           <div className={styles.metric}>
             <span className={styles.label}>Memory:</span>
             <span className={styles.value}>{metrics.memoryUsage}MB</span>
+          </div>
+        )}
+        {metrics.speed !== undefined && (
+          <div className={styles.metric}>
+            <span className={styles.label}>Speed:</span>
+            <span className={styles.value}>
+              {Math.round(metrics.speed)} km/h
+            </span>
           </div>
         )}
       </div>

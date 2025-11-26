@@ -35,14 +35,14 @@ export const configureFloorTexture = (texture: Texture) => {
     floorTextureRepeat.baseTexture,
     floorTextureRepeat.baseTexture
   );
+  texture.offset.set(0.5, 0.5);
+  texture.anisotropy = 16;
 
-  // Set colorSpace safely - wrap in try-catch in case texture isn't fully initialized
   try {
     if ('colorSpace' in texture) {
       texture.colorSpace = 'srgb';
     }
   } catch (e) {
-    // Texture might not be fully initialized yet, skip colorSpace setting
     console.warn('Could not set texture colorSpace:', e);
   }
 

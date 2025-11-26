@@ -10,12 +10,18 @@ interface CarProps {
   position?: [number, number, number];
   resetTrigger?: number;
   onChassisRefReady?: (ref: RefObject<Object3D>) => void;
+  onChassisApiReady?: (api: any) => void;
+  onVehicleApiReady?: (api: any) => void;
+  onSteeringValueReady?: (steeringValueRef: RefObject<number>) => void;
 }
 
 export const Car = ({
   position = [0, 0, 0],
   resetTrigger,
   onChassisRefReady,
+  onChassisApiReady,
+  onVehicleApiReady,
+  onSteeringValueReady,
 }: CarProps) => {
   // Car dimensions
   const chassisSize = useMemo(
@@ -42,6 +48,7 @@ export const Car = ({
   // Chassis ref and API
   const chassisRef = useRef<Object3D>(null!);
   const chassisApiRef = useRef<any>(null);
+  const vehicleApiRef = useRef<any>(null);
 
   // Expose chassis ref to parent
   useEffect(() => {
@@ -53,6 +60,9 @@ export const Car = ({
   // Callback to receive chassis API
   const handleChassisApiReady = (api: any) => {
     chassisApiRef.current = api;
+    if (onChassisApiReady) {
+      onChassisApiReady(api);
+    }
   };
 
   // Wheel refs for rendering - controlled by the vehicle
@@ -76,16 +86,16 @@ export const Car = ({
       radius: wheelRadius,
       directionLocal: [0, -1, 0] as [number, number, number],
       axleLocal: [-1, 0, 0] as [number, number, number], // direction of rotation
-      suspensionStiffness: 50,
-      suspensionRestLength: 0.3,
-      frictionSlip: 1.8,
-      dampingRelaxation: 2.3,
-      dampingCompression: 4.4,
+      suspensionStiffness: 100,
+      suspensionRestLength: 0.2,
+      frictionSlip: 3,
+      dampingRelaxation: 1,
+      dampingCompression: 1.4,
       maxSuspensionForce: 100000,
-      rollInfluence: 0.01,
+      rollInfluence: 0.06,
       maxSuspensionTravel: 0.3,
-      // customSlidingRotationalSpeed: -30,
-      // useCustomSlidingRotationalSpeed: true,
+      customSlidingRotationalSpeed: -30,
+      useCustomSlidingRotationalSpeed: true,
     }),
     [wheelRadius]
   );
@@ -127,6 +137,23 @@ export const Car = ({
     [wheelInfos]
   );
 
+  // Store vehicleApi in ref and expose to parent
+  useEffect(() => {
+    if (vehicleApi) {
+      vehicleApiRef.current = vehicleApi;
+      if (onVehicleApiReady) {
+        onVehicleApiReady(vehicleApi);
+      }
+    }
+  }, [vehicleApi, onVehicleApiReady]);
+
+  // Expose steering value ref to parent
+  useEffect(() => {
+    if (onSteeringValueReady) {
+      onSteeringValueReady(steeringValueRef);
+    }
+  }, [onSteeringValueReady]);
+
   // Keyboard controls
   const keysRef = useRef({
     forward: false,
@@ -135,7 +162,7 @@ export const Car = ({
     right: false,
   });
 
-  const engineForce = 1500;
+  const engineForce = 4000;
   const maxSteeringValue = 0.5;
   const steeringSpeed = 1.0; // radians per second
   const steeringValueRef = useRef(0);
