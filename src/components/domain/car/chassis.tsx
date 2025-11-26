@@ -1,24 +1,24 @@
-import { forwardRef, useMemo, useEffect, useRef, RefObject } from 'react';
+import { forwardRef, useMemo, useEffect, RefObject } from 'react';
 import { Object3D } from 'three';
 import { useGLTF } from '@react-three/drei';
 import { useBox } from '@react-three/cannon';
 import { applyCarChassisMaterials } from './material';
+import type { CarConfig } from './car-config-types';
 
 interface ChassisProps {
   args: [number, number, number];
   mass: number;
   chassisYOffset: number;
+  config: CarConfig;
   onApiReady: (api: any) => void;
+  position?: [number, number, number];
+  [key: string]: any; // Allow additional props to be passed to useBox
 }
 
 export const Chassis = forwardRef<Object3D, ChassisProps>(
-  ({ args, mass = 1500, chassisYOffset, onApiReady, ...props }, ref) => {
-    // Load the Porsche GLTF model
-    const { scene } = useGLTF(
-      '/models/1972_porsche_911_carrera_rs/porsche_rs_body.gltf'
-      //'/models/porsche_911gt2/porsche_911gt2.gltf'
-      //'/models/ruf_rt-12s/scene.gltf'
-    );
+  ({ args, mass, chassisYOffset, config, onApiReady, ...props }, ref) => {
+    // Load the GLTF model from config
+    const { scene } = useGLTF(config.model.chassisPath);
 
     // Clone the scene to avoid sharing state between instances
     const clonedScene = useMemo(() => scene.clone(), [scene]);
@@ -27,9 +27,9 @@ export const Chassis = forwardRef<Object3D, ChassisProps>(
       () => ({
         mass,
         args,
-        allowSleep: false,
-        linearDamping: 0.0,
-        angularDamping: 0.4,
+        allowSleep: config.physics.chassis.allowSleep,
+        linearDamping: config.physics.chassis.linearDamping,
+        angularDamping: config.physics.chassis.angularDamping,
         ...props,
       }),
       ref as RefObject<Object3D>
@@ -45,18 +45,19 @@ export const Chassis = forwardRef<Object3D, ChassisProps>(
     useEffect(() => {
       if (clonedScene) {
         const targetLength = args[2]; // Z dimension (length)
-        const scale = targetLength / 3.65; // Approximate model length
+        const scale =
+          (targetLength / config.model.modelLength) * config.model.modelScale;
         clonedScene.scale.set(scale, scale, scale);
 
-        // Rotate 180 degrees around Y axis to fix reversed Z axis
-        clonedScene.rotation.y = Math.PI;
+        // Rotate around Y axis from config
+        clonedScene.rotation.y = config.model.modelRotationY;
 
-        // Center the model relative to the physics body
-        clonedScene.position.set(0, -0.75, 0);
+        // Position the model from config
+        clonedScene.position.set(...config.model.modelPosition);
 
         applyCarChassisMaterials(clonedScene);
       }
-    }, [clonedScene, args]);
+    }, [clonedScene, args, config.model]);
 
     return (
       <group ref={ref} dispose={null}>

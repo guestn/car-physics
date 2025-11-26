@@ -1,0 +1,51 @@
+{
+  "porsche_911_carrera_rs": {
+    "name": "1972 Porsche 911 Carrera RS",
+    "model": {
+      "chassisPath": "/models/1972_porsche_911_carrera_rs/porsche_rs_body.gltf",
+      "wheelPath": "/models/porsche_911gt2/wheel.gltf",
+      "modelLength": 3.65,
+      "modelScale": 1.0,
+      "modelRotationY": 3.141592653589793,
+      "modelPosition": [0, -0.75, 0]
+    },
+    "dimensions": {
+      "chassisSize": [1.65, 1.33, 4.1],
+      "wheelRadius": 0.3,
+      "wheelWidth": 0.25,
+      "wheelbase": 2.5,
+      "trackWidth": 3.6,
+      "wheelPositions": {
+        "frontOffset": -0.06,
+        "backOffset": -0.09,
+        "height": -0.2
+      }
+    },
+    "physics": {
+      "chassis": {
+        "mass": 1500,
+        "linearDamping": 0.1,
+        "angularDamping": 0.4,
+        "allowSleep": false
+      },
+      "wheels": {
+        "suspensionStiffness": 100,
+        "suspensionRestLength": 0.2,
+        "frictionSlip": 3,
+        "dampingRelaxation": 1,
+        "dampingCompression": 1.4,
+        "maxSuspensionForce": 100000,
+        "rollInfluence": 0.06,
+        "maxSuspensionTravel": 0.3,
+        "customSlidingRotationalSpeed": -30,
+        "useCustomSlidingRotationalSpeed": true
+      }
+    },
+    "driving": {
+      "engineForce": 4000,
+      "maxSteeringValue": 0.4,
+      "steeringSpeed": 0.6
+    }
+  }
+}
+

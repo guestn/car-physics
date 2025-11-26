@@ -5,10 +5,15 @@ import { Object3D } from 'three';
 import type { Ref, RefObject } from 'react';
 import { Wheel } from './wheel';
 import { Chassis } from './chassis';
+import carConfigsData from './car-configs.json';
+import type { CarConfig } from './car-config-types';
+
+const carConfigs = carConfigsData as Record<string, CarConfig>;
 
 interface CarProps {
   position?: [number, number, number];
   resetTrigger?: number;
+  carConfigKey?: keyof typeof carConfigs;
   onChassisRefReady?: (ref: RefObject<Object3D>) => void;
   onChassisApiReady?: (api: any) => void;
   onVehicleApiReady?: (api: any) => void;
@@ -18,31 +23,35 @@ interface CarProps {
 export const Car = ({
   position = [0, 0, 0],
   resetTrigger,
+  carConfigKey = 'porsche_911_carrera_rs',
   onChassisRefReady,
   onChassisApiReady,
   onVehicleApiReady,
   onSteeringValueReady,
 }: CarProps) => {
-  // Car dimensions
+  // Get car configuration
+  const config = carConfigs[carConfigKey] as CarConfig;
+
+  // Car dimensions from config
   const chassisSize = useMemo(
-    () => [1.65, 1.33, 4.1] as [number, number, number],
-    []
+    () => config.dimensions.chassisSize,
+    [config.dimensions.chassisSize]
   );
-  const wheelRadius = 0.3;
-  const wheelWidth = 0.25;
-  const wheelbase = 2.5; // Distance between front and back wheels (Z axis - forward is -Z)
-  const trackWidth = 3.6; // Distance between left and right wheels (X axis)
+  const wheelRadius = config.dimensions.wheelRadius;
+  const wheelWidth = config.dimensions.wheelWidth;
+  const wheelbase = config.dimensions.wheelbase;
+  const trackWidth = config.dimensions.trackWidth;
 
   // Wheel positions relative to chassis center
-  const front = -wheelbase / 2 - 0.06; // Front wheels (negative Z)
-  const back = wheelbase / 2 - 0.09; // Back wheels (positive Z)
+  const front = -wheelbase / 2 + config.dimensions.wheelPositions.frontOffset;
+  const back = wheelbase / 2 + config.dimensions.wheelPositions.backOffset;
   const width = trackWidth / 2; // Half track width for sideMulti calculation
-  const height = -0.2; //-chassisSize[1] / 2 + 0.05; // Below chassis center
+  const height = config.dimensions.wheelPositions.height;
 
   // Chassis position offset (raised to sit on wheels)
   const chassisYOffset = useMemo(
     () => chassisSize[1] / 2 + wheelRadius,
-    [chassisSize]
+    [chassisSize, wheelRadius]
   );
 
   // Chassis ref and API
@@ -86,18 +95,20 @@ export const Car = ({
       radius: wheelRadius,
       directionLocal: [0, -1, 0] as [number, number, number],
       axleLocal: [-1, 0, 0] as [number, number, number], // direction of rotation
-      suspensionStiffness: 100,
-      suspensionRestLength: 0.2,
-      frictionSlip: 3,
-      dampingRelaxation: 1,
-      dampingCompression: 1.4,
-      maxSuspensionForce: 100000,
-      rollInfluence: 0.06,
-      maxSuspensionTravel: 0.3,
-      customSlidingRotationalSpeed: -30,
-      useCustomSlidingRotationalSpeed: true,
+      suspensionStiffness: config.physics.wheels.suspensionStiffness,
+      suspensionRestLength: config.physics.wheels.suspensionRestLength,
+      frictionSlip: config.physics.wheels.frictionSlip,
+      dampingRelaxation: config.physics.wheels.dampingRelaxation,
+      dampingCompression: config.physics.wheels.dampingCompression,
+      maxSuspensionForce: config.physics.wheels.maxSuspensionForce,
+      rollInfluence: config.physics.wheels.rollInfluence,
+      maxSuspensionTravel: config.physics.wheels.maxSuspensionTravel,
+      customSlidingRotationalSpeed:
+        config.physics.wheels.customSlidingRotationalSpeed,
+      useCustomSlidingRotationalSpeed:
+        config.physics.wheels.useCustomSlidingRotationalSpeed,
     }),
-    [wheelRadius]
+    [wheelRadius, config.physics.wheels]
   );
 
   // Wheel info for raycast vehicle - map over wheels array like in the example
@@ -162,9 +173,9 @@ export const Car = ({
     right: false,
   });
 
-  const engineForce = 4000;
-  const maxSteeringValue = 0.4;
-  const steeringSpeed = 0.6; // radians per second
+  const engineForce = config.driving.engineForce;
+  const maxSteeringValue = config.driving.maxSteeringValue;
+  const steeringSpeed = config.driving.steeringSpeed;
   const steeringValueRef = useRef(0);
   const lastResetTriggerRef = useRef(0);
 
@@ -316,9 +327,10 @@ export const Car = ({
       <Chassis
         ref={chassisRef}
         args={chassisSize}
-        mass={1500}
+        mass={config.physics.chassis.mass}
         position={[position[0], position[1] + chassisYOffset, position[2]]}
         chassisYOffset={0}
+        config={config}
         onApiReady={handleChassisApiReady}
       />
 
