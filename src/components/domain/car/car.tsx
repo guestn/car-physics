@@ -163,8 +163,8 @@ export const Car = ({
   });
 
   const engineForce = 4000;
-  const maxSteeringValue = 0.5;
-  const steeringSpeed = 1.0; // radians per second
+  const maxSteeringValue = 0.4;
+  const steeringSpeed = 0.6; // radians per second
   const steeringValueRef = useRef(0);
   const lastResetTriggerRef = useRef(0);
 
