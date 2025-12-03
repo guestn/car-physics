@@ -16,10 +16,11 @@ export const floorTextureRepeat = {
  */
 export const floorMaterialProps = {
   normalScale: [0.1, 0.1] as [number, number],
-  metalness: 0.1,
-  roughness: 0.1,
-  clearcoat: 0.6,
-  clearcoatRoughness: 0.2,
+  metalness: 0.0,
+  roughness: 0.7, // Increased from 0.1 to reduce reflectivity
+  envMapIntensity: 0.3, // Reduce environment map intensity for subtler reflections
+  //clearcoat: 0.0,
+  //clearcoatRoughness: 0.8,
   side: DoubleSide,
 };
 

@@ -5,6 +5,7 @@ import {
   LinearFilter,
   LinearMipmapLinearFilter,
   Texture,
+  MeshPhysicalMaterial,
 } from 'three';
 import { convertToPhysicalMaterial } from '../../../utils/material-utils';
 
@@ -13,8 +14,8 @@ import { convertToPhysicalMaterial } from '../../../utils/material-utils';
  */
 export const carChassisMaterialOverrides = {
   metalness: 0.1,
-  roughness: 0.0,
-  clearcoat: 1.0,
+  roughness: 0.1,
+  clearcoat: 0.9,
   clearcoatRoughness: 0.2,
 };
 
@@ -34,6 +35,27 @@ export const applyCarChassisMaterials = (scene: Object3D) => {
           carChassisMaterialOverrides
         );
         child.material = physicalMaterial;
+
+        if (child.name.includes('bodywork')) {
+          child.material.color.set(0xff7700);
+        }
+
+        if (child.name.includes('glass')) {
+          child.material.color.set(0x999999);
+          child.material.envMapIntensity = 1.0;
+          child.material.roughness = 0.0;
+          child.material.metalness = 1.0;
+          child.material.clearcoat = 1.0;
+        }
+      }
+
+      if (child.name.includes('chassis')) {
+        child.material.color.set(0x000000);
+        child.material.roughness = 0.7;
+        child.material.metalness = 0.1;
+        child.material.clearcoat = 0;
+        child.material.envMapIntensity = 0;
+        // child.material.clearcoatRoughness = 0.2;
       }
     }
   });
@@ -48,28 +70,33 @@ export const applyCarWheelMaterials = (scene: Object3D) => {
       child.castShadow = true;
       child.receiveShadow = true;
 
-      const carWheelMaterialOverrides = {
-        metalness: 0.1,
-        roughness: 0.0,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.2,
-      };
+      console.log({ child: child.name });
+
+      let carWheelMaterialOverrides: Partial<MeshPhysicalMaterial> = {};
 
       if (child.material) {
         const originalMaterial = child.material as Material;
         if ((child.name = 'Tire')) {
-          const carWheelMaterialOverrides = {
-            metalness: 0.1,
-            roughness: 0.5,
+          carWheelMaterialOverrides = {
+            metalness: 0.0,
+            roughness: 0.9,
             clearcoat: 0,
+            envMapIntensity: 0,
           };
-
-          const physicalMaterial = convertToPhysicalMaterial(
-            originalMaterial,
-            carWheelMaterialOverrides
-          );
-          child.material = physicalMaterial;
+        } else {
+          carWheelMaterialOverrides = {
+            metalness: 1,
+            roughness: 0.1,
+            clearcoat: 0.9,
+            clearcoatRoughness: 0.2,
+          };
         }
+
+        const physicalMaterial = convertToPhysicalMaterial(
+          originalMaterial,
+          carWheelMaterialOverrides
+        );
+        child.material = physicalMaterial;
       }
     }
   });

@@ -130,7 +130,7 @@ export const MainPage = ({
           logarithmicDepthBuffer: false,
         }}
       >
-        <Skybox position={[0, 10, 0]} />
+        <Skybox position={[0, -200, 0]} />
 
         <ambientLight intensity={0.3} />
         <directionalLight
@@ -191,7 +191,7 @@ export const MainPage = ({
                 <>
                   <FloorPlane position={[0, 0, 0]} />
                   <Car
-                    position={[0, 2, 0]}
+                    position={[0, 0, 0]}
                     resetTrigger={resetTrigger}
                     onChassisRefReady={(ref) => {
                       carChassisRef.current = ref.current;

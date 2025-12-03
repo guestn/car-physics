@@ -10,15 +10,64 @@
       "modelPosition": [0, -0.75, 0]
     },
     "dimensions": {
-      "chassisSize": [1.65, 1.33, 4.1],
-      "wheelRadius": 0.3,
+      "chassisSize": [1.65, 1.3, 4.1],
+      "wheelRadius": 0.32,
       "wheelWidth": 0.25,
       "wheelbase": 2.5,
       "trackWidth": 3.6,
       "wheelPositions": {
         "frontOffset": -0.06,
         "backOffset": -0.09,
-        "height": -0.2
+        "height": -0.25
+      }
+    },
+    "physics": {
+      "chassis": {
+        "mass": 1500,
+        "linearDamping": 0.1,
+        "angularDamping": 0.4,
+        "allowSleep": false
+      },
+      "wheels": {
+        "suspensionStiffness": 100,
+        "suspensionRestLength": 0.2,
+        "frictionSlip": 3,
+        "dampingRelaxation": 1,
+        "dampingCompression": 1.4,
+        "maxSuspensionForce": 100000,
+        "rollInfluence": 0.06,
+        "maxSuspensionTravel": 0.3,
+        "customSlidingRotationalSpeed": -30,
+        "useCustomSlidingRotationalSpeed": true
+      }
+    },
+    "driving": {
+      "engineForce": 4000,
+      "maxSteeringValue": 0.4,
+      "steeringSpeed": 0.6
+    }
+  },
+
+  "porsche_911_gt2": {
+    "name": "Porsche 911 GT2",
+    "model": {
+      "chassisPath": "/models/porsche_911gt2/porsche_911gt2.gltf",
+      "wheelPath": "/models/porsche_911gt2/wheel.gltf",
+      "modelLength": 3.65,
+      "modelScale": 1.0,
+      "modelRotationY": 3.141592653589793,
+      "modelPosition": [0, -0.75, 0]
+    },
+    "dimensions": {
+      "chassisSize": [1.65, 1.3, 4.1],
+      "wheelRadius": 0.32,
+      "wheelWidth": 0.25,
+      "wheelbase": 2.5,
+      "trackWidth": 3.6,
+      "wheelPositions": {
+        "frontOffset": -0.06,
+        "backOffset": -0.09,
+        "height": -0.25
       }
     },
     "physics": {

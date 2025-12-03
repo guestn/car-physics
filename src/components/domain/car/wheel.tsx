@@ -38,7 +38,7 @@ export const Wheel = forwardRef<Object3D, WheelProps>(
     useEffect(() => {
       if (clonedScene) {
         // Scale the wheel to match the radius
-        const scale = radius / 0.298;
+        const scale = 1; //radius / 0.298;
         clonedScene.scale.set(isLeft ? scale : scale, scale, scale);
 
         // Center the wheel model

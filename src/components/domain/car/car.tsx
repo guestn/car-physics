@@ -22,7 +22,7 @@ interface CarProps {
 export const Car = ({
   position = [0, 0, 0],
   resetTrigger,
-  carConfigKey = 'porsche_911_carrera_rs',
+  carConfigKey = 'porsche_911_carrera_rs', //'porsche_911_gt2', //'porsche_911_carrera_rs',
   onChassisRefReady,
   onChassisApiReady,
   onVehicleApiReady,
