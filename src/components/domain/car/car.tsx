@@ -1,14 +1,13 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, Ref, RefObject } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useRaycastVehicle } from '@react-three/cannon';
 import { Object3D } from 'three';
-import type { Ref, RefObject } from 'react';
 import { Wheel } from './wheel';
 import { Chassis } from './chassis';
 import carConfigsData from './car-configs.json';
 import type { CarConfig } from './car-config-types';
 
-const carConfigs = carConfigsData as Record<string, CarConfig>;
+const carConfigs = carConfigsData as unknown as Record<string, CarConfig>;
 
 interface CarProps {
   position?: [number, number, number];
@@ -75,18 +74,12 @@ export const Car = ({
   };
 
   // Wheel refs for rendering - controlled by the vehicle
-  const frontLeftWheelRef = useRef<Object3D>(null!);
-  const frontRightWheelRef = useRef<Object3D>(null!);
-  const backLeftWheelRef = useRef<Object3D>(null!);
-  const backRightWheelRef = useRef<Object3D>(null!);
-
+  const wheelRef1 = useRef<Object3D>(null!);
+  const wheelRef2 = useRef<Object3D>(null!);
+  const wheelRef3 = useRef<Object3D>(null!);
+  const wheelRef4 = useRef<Object3D>(null!);
   const wheelRefs = useMemo(
-    () => [
-      frontLeftWheelRef,
-      frontRightWheelRef,
-      backLeftWheelRef,
-      backRightWheelRef,
-    ],
+    () => [wheelRef1, wheelRef2, wheelRef3, wheelRef4],
     []
   );
 
@@ -111,7 +104,7 @@ export const Car = ({
     [wheelRadius, config.physics.wheels]
   );
 
-  // Wheel info for raycast vehicle - map over wheels array like in the example
+  // Wheel info for raycast vehicle - map over wheels array
   const wheelInfos = useMemo(
     () =>
       wheelRefs.map((_, index) => {
@@ -188,7 +181,7 @@ export const Car = ({
       chassisApiRef.current &&
       vehicleApi
     ) {
-      // Track that we've processed this reset trigger
+      // Track this reset trigger
       lastResetTriggerRef.current = resetTrigger;
 
       // Reset chassis position and rotation
@@ -203,65 +196,38 @@ export const Car = ({
 
       // Reset steering
       steeringValueRef.current = 0;
-      vehicleApi.setSteeringValue(0, 0);
-      vehicleApi.setSteeringValue(0, 1);
+      [0, 1].forEach((wheelIndex) => {
+        vehicleApi.setSteeringValue(0, wheelIndex);
+      });
     }
   }, [resetTrigger, position, chassisYOffset, vehicleApi]);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase();
-      // Prevent default behavior for arrow keys to avoid page scrolling
-      if (
-        key === 'arrowup' ||
-        key === 'arrowdown' ||
-        key === 'arrowleft' ||
-        key === 'arrowright'
-      ) {
-        event.preventDefault();
-      }
+    const keyMap: Record<string, keyof typeof keysRef.current> = {
+      w: 'forward',
+      arrowup: 'forward',
+      s: 'backward',
+      arrowdown: 'backward',
+      a: 'left',
+      arrowleft: 'left',
+      d: 'right',
+      arrowright: 'right',
+    };
 
-      switch (key) {
-        case 'w':
-        case 'arrowup':
-          keysRef.current.forward = true;
-          break;
-        case 's':
-        case 'arrowdown':
-          keysRef.current.backward = true;
-          break;
-        case 'a':
-        case 'arrowleft':
-          keysRef.current.left = true;
-          break;
-        case 'd':
-        case 'arrowright':
-          keysRef.current.right = true;
-          break;
+    const handleKey = (event: KeyboardEvent, value: boolean) => {
+      const key = event.key.toLowerCase();
+      const keyName = keyMap[key];
+
+      if (keyName) {
+        if (key.startsWith('arrow')) {
+          event.preventDefault();
+        }
+        keysRef.current[keyName] = value;
       }
     };
 
-    const handleKeyUp = (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase();
-      switch (key) {
-        case 'w':
-        case 'arrowup':
-          keysRef.current.forward = false;
-          break;
-        case 's':
-        case 'arrowdown':
-          keysRef.current.backward = false;
-          break;
-        case 'a':
-        case 'arrowleft':
-          keysRef.current.left = false;
-          break;
-        case 'd':
-        case 'arrowright':
-          keysRef.current.right = false;
-          break;
-      }
-    };
+    const handleKeyDown = (e: KeyboardEvent) => handleKey(e, true);
+    const handleKeyUp = (e: KeyboardEvent) => handleKey(e, false);
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
@@ -277,49 +243,43 @@ export const Car = ({
     if (!vehicleApi) return;
 
     // Apply engine force to rear wheels (indices 2 and 3)
-    if (keysRef.current.forward) {
-      vehicleApi.applyEngineForce(engineForce, 2);
-      vehicleApi.applyEngineForce(engineForce, 3);
-    } else if (keysRef.current.backward) {
-      vehicleApi.applyEngineForce(-engineForce, 2);
-      vehicleApi.applyEngineForce(-engineForce, 3);
-    } else {
-      vehicleApi.applyEngineForce(0, 2);
-      vehicleApi.applyEngineForce(0, 3);
-    }
+    const rearWheels = [2, 3];
+    const force = keysRef.current.forward
+      ? engineForce
+      : keysRef.current.backward
+        ? -engineForce
+        : 0;
+    rearWheels.forEach((wheelIndex) => {
+      vehicleApi.applyEngineForce(force, wheelIndex);
+    });
 
     // Update steering for front wheels (indices 0 and 1)
+    const frontWheels = [0, 1];
     if (keysRef.current.left) {
       steeringValueRef.current = Math.min(
         steeringValueRef.current + steeringSpeed * delta,
         maxSteeringValue
       );
-      vehicleApi.setSteeringValue(steeringValueRef.current, 0);
-      vehicleApi.setSteeringValue(steeringValueRef.current, 1);
     } else if (keysRef.current.right) {
       steeringValueRef.current = Math.max(
         steeringValueRef.current - steeringSpeed * delta,
         -maxSteeringValue
       );
-      vehicleApi.setSteeringValue(steeringValueRef.current, 0);
-      vehicleApi.setSteeringValue(steeringValueRef.current, 1);
     } else {
       // Return steering to center when not steering
       const returnSpeed = steeringSpeed * 2;
-      if (steeringValueRef.current > 0) {
-        steeringValueRef.current = Math.max(
-          0,
-          steeringValueRef.current - returnSpeed * delta
-        );
-      } else if (steeringValueRef.current < 0) {
-        steeringValueRef.current = Math.min(
-          0,
-          steeringValueRef.current + returnSpeed * delta
-        );
+      const current = steeringValueRef.current;
+      if (current > 0) {
+        steeringValueRef.current = Math.max(0, current - returnSpeed * delta);
+      } else if (current < 0) {
+        steeringValueRef.current = Math.min(0, current + returnSpeed * delta);
       }
-      vehicleApi.setSteeringValue(steeringValueRef.current, 0);
-      vehicleApi.setSteeringValue(steeringValueRef.current, 1);
     }
+
+    // Apply steering to front wheels
+    frontWheels.forEach((wheelIndex) => {
+      vehicleApi.setSteeringValue(steeringValueRef.current, wheelIndex);
+    });
   });
 
   return (

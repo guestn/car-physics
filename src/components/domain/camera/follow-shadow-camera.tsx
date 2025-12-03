@@ -14,12 +14,13 @@ interface FollowShadowCameraProps {
 export const FollowShadowCamera = ({
   target,
   lightRef,
-  shadowSize = 50,
+  shadowSize = 10,
   shadowDistance = 100,
   showHelper = true,
 }: FollowShadowCameraProps) => {
   const { scene } = useThree();
   const targetPosition = useRef(new Vector3());
+  const lightOffset = useRef(new Vector3(50, 150, 50)); // Same offset as initial position
   const helperRef = useRef<CameraHelper | null>(null);
 
   useEffect(() => {
@@ -45,8 +46,20 @@ export const FollowShadowCamera = ({
     // Get car's world position
     target.current.getWorldPosition(targetPosition.current);
 
-    // Update shadow camera position to follow the car
+    // Update directional light position to follow the car at the same relative offset
+    // This maintains the same angle so shadows are always under the car
     const light = lightRef.current;
+    light.position.set(
+      targetPosition.current.x + lightOffset.current.x,
+      targetPosition.current.y + lightOffset.current.y,
+      targetPosition.current.z + lightOffset.current.z
+    );
+
+    // Make the light look at the car to maintain consistent shadow direction
+    light.target.position.copy(targetPosition.current);
+    light.target.updateMatrixWorld();
+
+    // Update shadow camera position to follow the car
     if (light.shadow) {
       const shadowCamera = light.shadow.camera;
 

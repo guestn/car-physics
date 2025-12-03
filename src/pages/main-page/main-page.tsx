@@ -72,7 +72,6 @@ export const MainPage = ({
     );
   });
 
-  // Save debug settings to localStorage whenever they change
   useEffect(() => {
     setToLocalStorage(DEBUG_SETTINGS_STORAGE_KEY, debugSettings);
   }, [debugSettings]);
@@ -139,8 +138,8 @@ export const MainPage = ({
           position={[50, 150, 50]}
           intensity={6.0}
           castShadow
-          // shadow-mapSize-width={2048}
-          // shadow-mapSize-height={2048}
+          shadow-mapSize-width={4096}
+          shadow-mapSize-height={4096}
           // shadow-camera-near={0.1}
           // shadow-camera-far={200}
           // shadow-camera-left={-50}
@@ -149,7 +148,7 @@ export const MainPage = ({
           // shadow-camera-bottom={-50}
         />
         {/* <directionalLight position={[-5, 10, -5]} intensity={1.8} /> */}
-        <pointLight position={[100, 100, 100]} intensity={1.0} />
+        {/* <pointLight position={[100, 100, 100]} intensity={1.0} /> */}
 
         {/* Helper lines */}
         <axesHelper args={[5]} />
