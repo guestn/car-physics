@@ -50,8 +50,10 @@ export const FollowCamera = ({
     localOffset.current.applyQuaternion(carQuaternion.current);
     const targetPosition = carPosition.clone().add(localOffset.current);
 
+    const cameraYOffset = 2.5;
+
     // Set camera position directly with steering-based offset
-    camera.position.set(targetPosition.x, targetPosition.y, targetPosition.z);
+    camera.position.set(targetPosition.x, cameraYOffset, targetPosition.z);
 
     // Look at a point slightly ahead of the car
     const forwardOffset = new Vector3(0, 0, -2);

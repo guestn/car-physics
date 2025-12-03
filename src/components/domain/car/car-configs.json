@@ -11,10 +11,11 @@
     },
     "dimensions": {
       "chassisSize": [1.65, 1.3, 4.1],
-      "wheelRadius": 0.32,
+      "wheelRadius": 0.3,
+      "wheelScale": 1.1,
       "wheelWidth": 0.25,
       "wheelbase": 2.5,
-      "trackWidth": 3.6,
+      "trackWidth": 3.2,
       "wheelPositions": {
         "frontOffset": -0.06,
         "backOffset": -0.09,

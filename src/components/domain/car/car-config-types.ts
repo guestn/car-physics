@@ -11,6 +11,7 @@ export interface CarConfig {
   dimensions: {
     chassisSize: [number, number, number];
     wheelRadius: number;
+    wheelScale: number;
     wheelWidth: number;
     wheelbase: number;
     trackWidth: number;
@@ -48,4 +49,3 @@ export interface CarConfig {
 }
 
 export type CarConfigKey = keyof typeof import('./car-configs.json');
-

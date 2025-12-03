@@ -7,21 +7,25 @@ import { useCylinder } from '@react-three/cannon';
 
 interface WheelProps {
   radius: number;
+  wheelScale: number;
   width: number;
   isLeft?: boolean;
   wireframe?: boolean;
 }
 
 export const Wheel = forwardRef<Object3D, WheelProps>(
-  ({ radius, width, isLeft = false, wireframe = false }, ref) => {
+  (
+    { radius, wheelScale = 1, width, isLeft = false, wireframe = false },
+    ref
+  ) => {
     const { scene } = useGLTF(
-      //'/models/1972_porsche_911_carrera_rs/porsche_rs_wheel.gltf'
-      '/models/porsche_911gt2/wheel.gltf'
+      '/models/1972_porsche_911_carrera_rs/porsche_rs_wheel.gltf'
+      //'/models/porsche_911gt2/wheel.gltf'
     );
 
     const clonedScene = useMemo(() => scene.clone(), [scene]);
 
-    const [, api] = useCylinder(
+    useCylinder(
       () => ({
         mass: 50,
         type: 'Kinematic',
@@ -38,7 +42,7 @@ export const Wheel = forwardRef<Object3D, WheelProps>(
     useEffect(() => {
       if (clonedScene) {
         // Scale the wheel to match the radius
-        const scale = 1; //radius / 0.298;
+        const scale = wheelScale; //radius / 0.298;
         clonedScene.scale.set(isLeft ? scale : scale, scale, scale);
 
         // Center the wheel model

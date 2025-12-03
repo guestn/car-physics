@@ -101,7 +101,7 @@ export const createSkyBoxFrom4x3 = (
         );
         cubeTexture.minFilter = THREE.LinearFilter;
         cubeTexture.magFilter = THREE.LinearFilter;
-        cubeTexture.flipY = true;
+        cubeTexture.flipY = false;
       })
       .catch((error) => {
         if (onError) {

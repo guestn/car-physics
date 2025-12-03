@@ -301,6 +301,7 @@ export const Car = ({
           radius={wheelRadius}
           width={wheelWidth}
           isLeft={index % 2 === 0}
+          wheelScale={config.dimensions.wheelScale}
         />
       ))}
     </group>
